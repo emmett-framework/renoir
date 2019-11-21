@@ -9,7 +9,7 @@ Renoir – */ˈrɛnwɑːr/* – is a Python templating engine designed with simp
 {{ block title }}Members{{ end }}
 {{ block content }}
 <ul>
-  {{ for user in users }}
+  {{ for user in users: }}
   <li><a href="{{ =user.url }}">{{ =user.username }}</a></li>
   {{ pass }}
 </ul>
