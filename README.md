@@ -1,6 +1,6 @@
 # Renoir
 
-A Python templating engine designed with simplicity in mind.
+Renoir – */ˈrɛnwɑːr/* – is a Python templating engine designed with simplicity in mind.
 
 ## In a nutshell
 
