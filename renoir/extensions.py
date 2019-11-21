@@ -10,6 +10,7 @@
 """
 
 
+# TODO: metaclass checks for methods definitions
 class Extension:
     namespace = None
     file_extension = None
@@ -32,5 +33,5 @@ class Extension:
     def render(self, source, name):
         return source
 
-    def inject(self, context):
+    def context(self, context):
         pass

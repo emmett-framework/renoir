@@ -262,7 +262,7 @@ class TemplateParser:
         self.writer = writer
         self.scope = scope
         #: lexers to use
-        self.lexers = default_lexers
+        self.lexers = dict(default_lexers)
         self.lexers.update(lexers)
         #: configure delimiters
         self.delimiters = delimiters

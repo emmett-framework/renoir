@@ -17,6 +17,7 @@ from functools import reduce
 from .cache import TemplaterCache
 from .debug import make_traceback
 from .errors import TemplateError, TemplateMissingError, TemplateSyntaxError
+from .extensions import Extension
 from .helpers import TemplateReference, ParserCtx, adict
 from .parser import TemplateParser, PrettyTemplateParser
 from .writers import (
@@ -31,14 +32,16 @@ class Renoir:
     }
 
     def __init__(
-        self, loaders=None, renderers=None, lexers=None, path=None,
+        self, path=None,
+        loaders=None, renderers=None, contexts=None, lexers=None,
         encoding='utf8', escape='common', prettify=False,
         reload=False, debug=False
     ):
         self.path = path or os.getcwd()
         self.loaders = loaders or {}
         self.renderers = renderers or []
-        self.lexers = lexers or []
+        self.contexts = contexts or []
+        self.lexers = lexers or {}
         self.encoding = encoding
         self.escape = escape
         self.prettify = prettify
@@ -63,12 +66,18 @@ class Renoir:
         return namespace, self._extensions_env[namespace]
 
     def use_extension(self, ext_cls, **config):
+        if not issubclass(ext_cls, Extension):
+            raise RuntimeError(
+                f'{ext_cls.__name__} is an invalid Renoir extension'
+            )
         namespace, env = self.__init_extension(ext_cls)
         ext = ext_cls(self, env, config)
         if ext.file_extension:
             self.loaders[ext.file_extension] = (
                 self.loaders.get(ext.file_extension) or [])
             self.loaders[ext.file_extension].append(ext.load)
+        self.renderers.append(ext.render)
+        self.contexts.append(ext.context)
         for name, lexer in ext.lexers.items():
             self.lexers[name] = lexer(ext=ext)
         self._extensions.append(ext)
@@ -135,8 +144,8 @@ class Renoir:
         return code, content
 
     def inject(self, context):
-        for renderer in self.renderers:
-            renderer.inject(context)
+        for injector in self.contexts:
+            injector(context)
 
     def _render(self, source='', file_path='<string>', context=None):
         context = context or {}
