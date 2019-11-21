@@ -46,19 +46,3 @@ class ParserCtx:
 class adict(dict):
     __setattr__ = dict.__setitem__
     __getattr__ = dict.__getitem__
-
-
-class cachedprop:
-    __slots__ = ('fget', '__doc__', '__name__')
-
-    def __init__(self, fget, doc=None, name=None):
-        self.fget = fget
-        self.__doc__ = doc or fget.__doc__
-        self.__name__ = name or fget.__name__
-
-    def __get__(self, obj, cls):
-        if obj is None:
-            return self
-        rv = self.fget(obj)
-        setattr(obj, self.__name__, rv)
-        return rv

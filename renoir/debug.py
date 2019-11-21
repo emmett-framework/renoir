@@ -13,8 +13,6 @@
     :license: BSD, see LICENSE for more details.
 """
 
-import inspect
-import os
 import sys
 import traceback
 
@@ -22,7 +20,6 @@ from types import TracebackType, CodeType
 
 from ._internal import reraise
 from .errors import TemplateError, TemplateSyntaxError
-from .helpers import cachedprop
 
 
 # on pypy we can take advantage of transparent proxies
@@ -104,91 +101,6 @@ class ProcessedTraceback:
         if type(tb) is not TracebackType:
             tb = tb.tb
         return self.exc_type, self.exc_value, tb
-
-
-class Frame:
-    """A single frame in a traceback."""
-
-    def __init__(self, app, exc_type, exc_value, tb):
-        self.app = app
-        self.lineno = tb.tb_lineno
-        self.function_name = tb.tb_frame.f_code.co_name
-        self.locals = tb.tb_frame.f_locals
-        self.globals = tb.tb_frame.f_globals
-
-        fn = inspect.getsourcefile(tb) or inspect.getfile(tb)
-        if fn[-4:] in ('.pyo', '.pyc'):
-            fn = fn[:-1]
-        # if it's a file on the file system resolve the real filename.
-        if os.path.isfile(fn):
-            fn = os.path.realpath(fn)
-        self.filename = fn
-        self.module = self.globals.get('__name__')
-        self.code = tb.tb_frame.f_code
-
-    @property
-    def is_in_fw(self):
-        fw_path = os.path.dirname(__file__)
-        return self.filename[0:len(fw_path)] == fw_path
-
-    @property
-    def is_in_app(self):
-        return self.filename[0:len(self.app.root_path)] == self.app.root_path
-
-    @property
-    def rendered_filename(self):
-        if self.is_in_app:
-            return self.filename[len(self.app.root_path) + 1:]
-        if self.is_in_fw:
-            return ''.join([
-                "renoir.",
-                self.filename[
-                    len(os.path.dirname(__file__)) + 1:
-                ].replace("/", ".").split(".py")[0]
-            ])
-        return self.filename
-
-    @cachedprop
-    def sourcelines(self):
-        try:
-            with open(self.filename, 'rb') as file:
-                source = file.read().decode('utf8')
-        except IOError:
-            source = '<unavailable>'
-        return source.splitlines()
-
-    @property
-    def sourceblock(self):
-        lmax = self.lineno + 4
-        return '\n'.join(self.sourcelines[self.first_line_no - 1:lmax])
-
-    @property
-    def first_line_no(self):
-        number = self.lineno > 5 and (self.lineno - 5) or 1
-        if number > len(self.sourcelines):
-            number = 1
-        while not self.sourcelines[number - 1]:
-            number += 1
-            if number > len(self.sourcelines):
-                break
-        return number
-
-    @property
-    def current_line(self):
-        try:
-            return self.sourcelines[self.lineno - 1]
-        except IndexError:
-            return ''
-
-    @cachedprop
-    def render_locals(self):
-        rv = dict()
-        for k, v in self.locals.items():
-            try:
-                rv[k] = str(v)
-            except Exception:
-                rv[k] = '<unavailable>'
-        return rv
 
 
 def make_traceback(exc_info):
