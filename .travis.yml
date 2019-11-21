@@ -1,0 +1,20 @@
+language: python
+dist: xenial
+
+cache:
+  directories:
+    - $HOME/.pip-cache/
+
+python:
+  - "3.6"
+  - "3.7"
+  - pypy3
+
+install:
+  - pip install tox>=1.8
+
+script:
+  - tox -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d . | tr -d "\-dev" | sed -e 's/pypypy/pypy/')
+
+notifications:
+  email: false
