@@ -76,8 +76,10 @@ class Renoir:
             self.loaders[ext.file_extension] = (
                 self.loaders.get(ext.file_extension) or [])
             self.loaders[ext.file_extension].append(ext.load)
-        self.renderers.append(ext.render)
-        self.contexts.append(ext.context)
+        if ext._ext_render_:
+            self.renderers.append(ext.render)
+        if ext._ext_context_:
+            self.contexts.append(ext.context)
         for name, lexer in ext.lexers.items():
             self.lexers[name] = lexer(ext=ext)
         self._extensions.append(ext)
