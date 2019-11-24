@@ -1,3 +1,4 @@
 include CHANGES.md LICENSE
 recursive-include docs *
 recursive-include tests *
+recursive-exclude tests/__pycache__ *
