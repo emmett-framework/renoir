@@ -83,6 +83,7 @@ class Renoir:
         for name, lexer in ext.lexers.items():
             self.lexers[name] = lexer(ext=ext)
         self._extensions.append(ext)
+        ext.on_load()
         self._configure()
         return ext
 

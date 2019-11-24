@@ -34,6 +34,7 @@ class Extension(metaclass=MetaExtension):
     namespace = None
     file_extension = None
     lexers = {}
+    default_config = {}
 
     def __init__(self, templater, namespace, env, config=None):
         self.templater = templater
@@ -45,6 +46,14 @@ class Extension(metaclass=MetaExtension):
             not self.file_extension.startswith('.')
         ):
             self.file_extension = '.' + self.file_extension
+        self.__load_config()
+
+    def __load_config(self):
+        for key, default_val in self.default_config.items():
+            self.config[key] = self.config.get(key, default_val)
+
+    def on_load(self):
+        pass
 
     def load(self, path, file_name):
         return path, file_name
