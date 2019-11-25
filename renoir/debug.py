@@ -228,25 +228,20 @@ def fake_exc_info(exc_info, filename, lineno):
 
     # and fake the exception
     code = compile('\n' * (lineno - 1) + raise_helper, filename, 'exec')
-    if hasattr(code, 'co_kwonlyargcount'):
-        cargs = (
+    if hasattr(code, 'replace'):
+        code = code.replace(co_filename=filename, co_name='template')
+    elif hasattr(code, 'co_kwonlyargcount'):
+        code = CodeType(
             0, 0, code.co_nlocals, code.co_stacksize, code.co_flags,
             code.co_code, code.co_consts, code.co_names, code.co_varnames,
             filename, 'template', code.co_firstlineno, code.co_lnotab, (), ()
         )
     else:
-        cargs = (
+        code = CodeType(
             0, code.co_nlocals, code.co_stacksize, code.co_flags,
             code.co_code, code.co_consts, code.co_names, code.co_varnames,
             filename, 'template', code.co_firstlineno, code.co_lnotab, (), ()
         )
-
-    # if it's possible, change the name of the code.  This won't work
-    # on some python environments such as google appengine
-    try:
-        code = CodeType(*cargs)
-    except Exception:
-        pass
 
     # execute the code and catch the new traceback
     try:
