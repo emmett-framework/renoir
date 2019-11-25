@@ -71,7 +71,7 @@ class Renoir:
                 f'{ext_cls.__name__} is an invalid Renoir extension'
             )
         namespace, env = self.__init_extension(ext_cls)
-        ext = ext_cls(self, env, config)
+        ext = ext_cls(self, namespace, env, config)
         if ext.file_extension:
             self.loaders[ext.file_extension] = (
                 self.loaders.get(ext.file_extension) or [])
