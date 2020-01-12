@@ -75,8 +75,10 @@ def test_render_pyerror(templater_pretty):
         tb = tb.tb_next
     tb_frame = frames[-1]
 
+    tpath = os.sep.join(['templates', 'pyerror.html'])
+
     assert frame.name == 'template'
-    assert str(frame.path).endswith('/templates/pyerror.html')
+    assert str(frame.path).endswith(tpath)
     assert tb_frame.tb_lineno == 2
 
-    assert '/templates/pyerror.html", line 2, in template' in tbs
+    assert f'{tpath}", line 2, in template' in tbs
