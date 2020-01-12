@@ -1,34 +1,34 @@
-"""
-Renoir is a templating engine designed with simplicity in mind.
+# -*- coding: utf-8 -*-
 
-
-Links
------
-
-* `git repo <http://github.com/emmett-framework/renoir>`_
-
-"""
-
+import io
 import re
 
 from setuptools import find_packages, setup
 
-with open('renoir/__init__.py', 'r', encoding='utf8') as f:
-    version = re.search(r'__version__ = "(.*?)"', f.read(), re.M).group(1)
+with io.open("README.md", "rt", encoding="utf8") as f:
+    readme = f.read()
+
+with io.open("renoir/__version__.py", "rt", encoding="utf8") as f:
+    version = re.search(r'__version__ = "(.*?)"', f.read()).group(1)
 
 
 setup(
     name='Renoir',
     version=version,
     url='http://github.com/emmett-framework/renoir',
+    project_urls={
+        'Code': 'https://github.com/emmett-framework/renoir',
+        'Issue tracker': 'https://github.com/emmett-framework/renoir/issues',
+    },
     license='BSD-3-Clause',
     author='Giovanni Barillari',
     author_email='gi0baro@d4net.org',
-    description='A templating engine designed with simplicity in mind.',
-    long_description=__doc__,
+    description='A templating engine designed with simplicity in mind',
+    long_description=readme,
     packages=find_packages(),
-    python_requires='>=3.6',
     include_package_data=True,
+    platforms='any',
+    python_requires='>=3.6',
     install_requires=[],
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -44,6 +44,5 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Text Processing :: Markup :: HTML'
-    ],
-    entry_points={}
+    ]
 )
