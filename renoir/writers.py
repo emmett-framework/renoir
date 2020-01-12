@@ -5,8 +5,8 @@
 
     Provides the writers for the templating system.
 
-    :copyright: (c) 2014-2019 by Giovanni Barillari
-    :license: BSD, see LICENSE for more details.
+    :copyright: 2014 Giovanni Barillari
+    :license: BSD-3-Clause
 """
 
 from io import StringIO

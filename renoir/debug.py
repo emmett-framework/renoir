@@ -5,12 +5,12 @@
 
     Provides debugging utilities.
 
-    :copyright: (c) 2014-2019 by Giovanni Barillari
+    :copyright: 2014 Giovanni Barillari
 
     Quite a lot of magic comes from Flask (http://flask.pocoo.org)
     :copyright: (c) 2014 by Armin Ronacher.
 
-    :license: BSD, see LICENSE for more details.
+    :license: BSD-3-Clause
 """
 
 import sys

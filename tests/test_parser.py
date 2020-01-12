@@ -4,9 +4,6 @@
     ------------
 
     Tests parser module.
-
-    :copyright: (c) 2014-2019 by Giovanni Barillari
-    :license: BSD, see LICENSE for more details.
 """
 
 import pytest
