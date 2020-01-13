@@ -127,5 +127,5 @@ default_lexers = {
     'super': SuperLexer(),
     'include': IncludeLexer(),
     'extend': ExtendLexer(),
-    'asis': IgnoreLexer()
+    'raw': IgnoreLexer()
 }

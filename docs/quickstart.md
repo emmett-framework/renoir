@@ -161,13 +161,13 @@ Then your pages can define the variables before extending:
 Escaping
 --------
 
-It is sometimes desirable – even necessary – to have Renoir ignore parts it would otherwise handle as Python code. For example, if, with the default syntax, you want to use {{ as a raw string in a template and not start Python evaluation, you can use the `asis` block:
+It is sometimes desirable – even necessary – to have Renoir ignore parts it would otherwise handle as Python code. For example, if, with the default syntax, you want to use curly braces as a raw string in a template and not start Python evaluation, you can use the `raw` block:
 
 ```html
 <!-- this gets processed -->
 {{ =message }}
 <!-- this not -->
-{{ asis }}
+{{ raw }}
 {{ =message }}
 {{ end }}
 ```
