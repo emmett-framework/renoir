@@ -3,6 +3,7 @@
 Renoir – */ˈrɛnwɑːr/* – is a Python templating engine designed with simplicity in mind.
 
 [![pip version](https://img.shields.io/pypi/v/renoir.svg?style=flat)](https://pypi.python.org/pypi/Renoir)
+![Tests Status](https://github.com/emmett-framework/renoir/workflows/Tests/badge.svg)
 
 ## In a nutshell
 
