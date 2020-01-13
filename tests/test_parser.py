@@ -48,6 +48,16 @@ def test_variable(templater, templater_pretty):
     ) == "[0, 1, 2, 3, 4]"
 
 
+def test_raw(templater, templater_pretty):
+    s = '{{=1}}{{raw}}{{=1}}{{end}}'
+    assert templater._render(
+        source=s
+    ) == '1{{=1}}'
+    assert templater_pretty._render(
+        source=s
+    ) == '1\n{{=1}}'
+
+
 def test_pycode(templater, templater_pretty):
     #: test if block
     s = (

@@ -106,7 +106,7 @@ Then we can build a child template in *index.html* file:
 Template context
 ----------------
 
-Since context get shared across all the templates you might include or extend, you can also extend it directly inside the templates. For instance, we can rewrite the inheritance example like this:
+Since context get shared across all the templates you might include or extend, you can also change it directly inside the templates. For instance, we can rewrite the inheritance example like this:
 
 ```html
 {{ title = locals().get('title')}}
