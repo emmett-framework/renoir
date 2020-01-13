@@ -13,7 +13,7 @@ Renoir – */ˈrɛnwɑːr/* – is a Python templating engine designed with simp
 {{ block content }}
 <ul>
   {{ for user in users: }}
-  <li><a href="{{ =user.url }}">{{ =user.username }}</a></li>
+  <li><a href="{{ =user['url'] }}">{{ =user['name'] }}</a></li>
   {{ pass }}
 </ul>
 {{ end }}
@@ -21,7 +21,7 @@ Renoir – */ˈrɛnwɑːr/* – is a Python templating engine designed with simp
 
 ## Documentation
 
-*The documentation will be soon available under the docs folder.*
+The documentation is available under the [docs folder](https://github.com/emmett-framework/renoir/tree/master/docs).
 
 ## License
 
