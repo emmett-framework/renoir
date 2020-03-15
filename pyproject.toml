@@ -41,6 +41,7 @@ python = "^3.6"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.3"
+pylint = "^2.4.4"
 
 [build-system]
 requires = ["poetry>=1.0.0"]

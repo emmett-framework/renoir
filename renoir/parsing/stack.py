@@ -20,7 +20,7 @@ ParsedLines = namedtuple('ParsedLines', ('start', 'end'))
 
 
 class Content:
-    __slots__ = ('_contents')
+    __slots__ = ['_contents']
 
     def __init__(self):
         self._contents = []
@@ -44,11 +44,11 @@ class Content:
 
 
 class State:
-    __slots__ = (
+    __slots__ = [
         '_id', 'name', 'source', 'elements', 'blocks', 'lines',
         'in_python_block', 'content', 'parent', 'settings', 'dependencies',
         'indent', 'new_line'
-    )
+    ]
 
     def __init__(
         self, name, elements, in_python_block=False, parent=None, source=None,

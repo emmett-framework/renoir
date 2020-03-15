@@ -10,7 +10,7 @@
 """
 
 
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, Tuple
 
 
 LoaderType = Callable[[str, str], Tuple[str, str]]
