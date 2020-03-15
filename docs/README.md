@@ -5,3 +5,4 @@ The documentation is divided into different parts. We recommend you to read the 
 
 - [Installation](./installation.md)
 - [Getting started](./quickstart.md)
+- [Extensions](./extensions.md)
