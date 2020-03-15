@@ -77,7 +77,7 @@ class Renoir:
             self._extensions_env[namespace] = adict()
         return namespace, self._extensions_env[namespace]
 
-    def use_extension(self, ext_cls: Type[Extension], **config):
+    def use_extension(self, ext_cls: Type[Extension], **config) -> Extension:
         if not issubclass(ext_cls, Extension):
             raise RuntimeError(
                 f'{ext_cls.__name__} is an invalid Renoir extension'
