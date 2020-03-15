@@ -9,6 +9,10 @@
     :license: BSD-3-Clause
 """
 
+from typing import Any, Dict, Optional, Tuple, Type
+
+from .parsing.lexers import Lexer
+
 
 class MetaExtension(type):
     _ext_methods_ = {'load', 'render', 'context'}
@@ -31,10 +35,10 @@ class MetaExtension(type):
 
 
 class Extension(metaclass=MetaExtension):
-    namespace = None
-    file_extension = None
-    lexers = {}
-    default_config = {}
+    namespace: Optional[str] = None
+    file_extension: Optional[str] = None
+    lexers: Dict[str, Type[Lexer]] = {}
+    default_config: Dict[str, Any] = {}
 
     def __init__(self, templater, namespace, env, config=None):
         self.templater = templater
@@ -55,11 +59,11 @@ class Extension(metaclass=MetaExtension):
     def on_load(self):
         pass
 
-    def load(self, path, file_name):
+    def load(self, path: str, file_name: str) -> Tuple[str, str]:
         return path, file_name
 
-    def render(self, source, name):
+    def render(self, source: str, name: str) -> str:
         return source
 
-    def context(self, context):
+    def context(self, context: Dict[str, Any]):
         pass

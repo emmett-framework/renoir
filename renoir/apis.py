@@ -13,16 +13,19 @@ import os
 import sys
 
 from functools import reduce
+from typing import Any, Dict, List, Optional, Type
 
 from .cache import TemplaterCache
 from .debug import make_traceback
 from .errors import TemplateError, TemplateMissingError, TemplateSyntaxError
 from .extensions import Extension
 from .helpers import TemplateReference, ParserCtx, adict
-from .parser import TemplateParser, PrettyTemplateParser
+from .parsing import Lexer, TemplateParser, PrettyTemplateParser
+from .typing import LoaderType, RenderType, ContextType
 from .writers import (
     Writer, EscapeAllWriter,
-    IndentWriter, EscapeAllIndentWriter)
+    IndentWriter, EscapeAllIndentWriter
+)
 
 
 class Renoir:
@@ -32,10 +35,17 @@ class Renoir:
     }
 
     def __init__(
-        self, path=None,
-        loaders=None, renderers=None, contexts=None, lexers=None,
-        encoding='utf8', escape='common', prettify=False,
-        reload=False, debug=False
+        self,
+        path: Optional[str] = None,
+        loaders: Optional[Dict[str, List[LoaderType]]] = None,
+        renderers: Optional[List[RenderType]] = None,
+        contexts: Optional[List[ContextType]] = None,
+        lexers: Optional[Dict[str, Lexer]] = None,
+        encoding: str = 'utf8',
+        escape: str = 'common',
+        prettify: bool = False,
+        reload: bool = False,
+        debug: bool = False
     ):
         self.path = path or os.getcwd()
         self.loaders = loaders or {}
@@ -54,9 +64,11 @@ class Renoir:
         writer_group_key = 'pretty' if self.prettify else 'basic'
         writer_group = self._writers[writer_group_key]
         self.writer_cls = writer_group.get(
-            self.escape, writer_group['common'])
+            self.escape, writer_group['common']
+        )
         self.parser_cls = (
-            PrettyTemplateParser if self.prettify else TemplateParser)
+            PrettyTemplateParser if self.prettify else TemplateParser
+        )
         self.preload = self._preload if self.loaders else self._no_preload
 
     def __init_extension(self, ext_cls):
@@ -65,7 +77,7 @@ class Renoir:
             self._extensions_env[namespace] = adict()
         return namespace, self._extensions_env[namespace]
 
-    def use_extension(self, ext_cls, **config):
+    def use_extension(self, ext_cls: Type[Extension], **config):
         if not issubclass(ext_cls, Extension):
             raise RuntimeError(
                 f'{ext_cls.__name__} is an invalid Renoir extension'
@@ -74,7 +86,8 @@ class Renoir:
         ext = ext_cls(self, namespace, env, config)
         if ext.file_extension:
             self.loaders[ext.file_extension] = (
-                self.loaders.get(ext.file_extension) or [])
+                self.loaders.get(ext.file_extension) or []
+            )
             self.loaders[ext.file_extension].append(ext.load)
         if ext._ext_render_:
             self.renderers.append(ext.render)
@@ -131,19 +144,25 @@ class Renoir:
         code, content = self.cache.parse.get(file_path, source)
         if not code:
             parser = self.parser_cls(
-                self, source, name=file_path, scope=context,
-                lexers=self.lexers)
+                self,
+                source,
+                name=file_path,
+                scope=context,
+                lexers=self.lexers
+            )
             try:
                 code = compile(
                     parser.render(),
                     os.path.split(file_path)[-1],
-                    'exec')
+                    'exec'
+                )
             except SyntaxError:
                 parser_ctx = ParserCtx(file_path, parser.content)
                 raise TemplateSyntaxError(parser_ctx, *sys.exc_info())
             content = parser.content
             self.cache.parse.set(
-                file_path, source, code, content, parser.dependencies)
+                file_path, source, code, content, parser.dependencies
+            )
         return code, content
 
     def inject(self, context):
@@ -171,7 +190,11 @@ class Renoir:
             make_traceback(exc_info)
         return context['__writer__'].body.getvalue()
 
-    def render(self, template_file_name, context=None):
+    def render(
+        self,
+        template_file_name: str,
+        context: Optional[Dict[str, Any]] = None
+    ) -> str:
         file_path = os.path.join(*self.preload(template_file_name))
         source = self.prerender(self.load(file_path), file_path)
         return self._render(source, file_path, context)

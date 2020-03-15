@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    renoir.lexers
-    -------------
+    renoir.parsing.lexers
+    ---------------------
 
     Provides lexers for templates parsing.
 
@@ -9,19 +9,23 @@
     :license: BSD-3-Clause
 """
 
+from typing import Optional
+
+from .stack import Context
+
 
 class Lexer:
-    evaluate = False
+    evaluate: bool = False
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
-    def __call__(self, ctx, value=None):
+    def __call__(self, ctx: Context, value: Optional[str] = None):
         if self.evaluate and value is not None:
             value = eval(value, ctx.scope)
         self.process(ctx, value)
 
-    def process(self, ctx, value):
+    def process(self, ctx: Context, value: Optional[str]):
         raise NotImplementedError
 
 

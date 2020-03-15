@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    renoir.contents
-    ---------------
+    renoir.parsing.contents
+    -----------------------
 
     Provides structures for templating system.
 
@@ -9,9 +9,8 @@
     :license: BSD-3-Clause
 """
 
-# TODO: check unicode conversions
-from ._shortcuts import to_unicode
-from .helpers import adict
+from .._shortcuts import to_unicode
+from ..helpers import adict
 
 
 class Node:
