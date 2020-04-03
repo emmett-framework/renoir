@@ -1,16 +1,15 @@
 [tool.poetry]
 name = "Renoir"
-version = "1.1.0"
+version = "1.2.0.dev0"
 description = "A templating engine designed with simplicity in mind"
 authors = ["Giovanni Barillari <gi0baro@d4net.org>"]
 license = "BSD-3-Clause"
 
 readme = "README.md"
-# homepage = "https://github.com/emmett-framework/renoir"
+homepage = "https://github.com/emmett-framework/renoir"
 repository = "https://github.com/emmett-framework/renoir"
-# documentation = "https://github.com/emmett-framework/renoir"
 
-keywords = ["internationalization"]
+keywords = ["templates", "html", "web"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",
@@ -21,7 +20,6 @@ classifiers = [
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
-    "Topic :: Software Development :: Internationalization",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Text Processing :: Markup :: HTML"
 ]
@@ -36,12 +34,16 @@ include = [
     "docs/**/*"
 ]
 
+[tool.poetry.urls]
+"Issue Tracker" = "https://github.com/emmett-framework/renoir/issues"
+
 [tool.poetry.dependencies]
 python = "^3.6"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.3"
 pylint = "^2.4.4"
+pyyaml = "^5.3.1"
 
 [build-system]
 requires = ["poetry>=1.0.0"]
