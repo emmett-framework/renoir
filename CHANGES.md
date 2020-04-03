@@ -1,6 +1,15 @@
 Renoir changelog
 ================
 
+Version 1.2
+-----------
+
+*Released on April 3rd 2020*
+
+- Refactored parser
+- Added `plain` mode
+- Removed `prettify` option in favour of `adjust_indent`
+
 Version 1.1
 -----------
 
