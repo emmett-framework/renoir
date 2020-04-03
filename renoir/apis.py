@@ -16,6 +16,7 @@ from functools import reduce
 from typing import Any, Dict, List, Optional, Type
 
 from .cache import TemplaterCache
+from .constants import MODES, ESCAPES
 from .debug import make_traceback
 from .errors import TemplateError, TemplateMissingError, TemplateSyntaxError
 from .extensions import Extension
@@ -35,7 +36,7 @@ from .writers import (
 
 
 class Renoir:
-    _writers = {'common': Writer, 'all': EscapeAllWriter}
+    _writers = {ESCAPES.common: Writer, ESCAPES.all: EscapeAllWriter}
 
     def __init__(
         self,
@@ -45,8 +46,8 @@ class Renoir:
         contexts: Optional[List[ContextType]] = None,
         lexers: Optional[Dict[str, Lexer]] = None,
         encoding: str = 'utf8',
-        mode: str = 'html',
-        escape: str = 'common',
+        mode: str = MODES.html,
+        escape: str = ESCAPES.common,
         adjust_indent: bool = False,
         reload: bool = False,
         debug: bool = False
@@ -67,16 +68,16 @@ class Renoir:
 
     def _configure(self):
         self.writer_cls = self._writers.get(
-            self.escape, self._writers['common']
+            self.escape, self._writers[ESCAPES.common]
         )
         if not self.indent:
             self.parser_cls = (
-                HTMLTemplateParser if self.mode == 'html' else
+                HTMLTemplateParser if self.mode == MODES.html else
                 TemplateParser
             )
         else:
             self.parser_cls = (
-                HTMLIndentTemplateParser if self.mode == 'html' else
+                HTMLIndentTemplateParser if self.mode == MODES.html else
                 IndentTemplateParser
             )
         self.preload = self._preload if self.loaders else self._no_preload
