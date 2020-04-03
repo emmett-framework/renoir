@@ -9,50 +9,34 @@
     :license: BSD-3-Clause
 """
 
+from __future__ import annotations
+
 import uuid
 
 from collections import namedtuple
 
-from .contents import Node, NodeGroup
+from .contents import Content, Elements, Node, NodeGroup
 
 
 ParsedLines = namedtuple('ParsedLines', ('start', 'end'))
 
 
-class Content:
-    __slots__ = ['_contents']
-
-    def __init__(self):
-        self._contents = []
-
-    def append(self, element):
-        self._contents.append(element)
-
-    def extend(self, *elements):
-        for element in elements:
-            self.append(element)
-
-    def render(self, parser):
-        return ''.join(
-            element.__render__(parser) for element in self._contents)
-
-    def reference(self):
-        rv = []
-        for element in self._contents:
-            rv.extend(element.__reference__())
-        return rv
-
-
 class State:
     __slots__ = [
-        '_id', 'name', 'source', 'elements', 'blocks', 'lines',
-        'in_python_block', 'content', 'parent', 'settings', 'dependencies',
-        'indent', 'new_line'
+        '_id', 'name', 'source', 'lines',
+        'elements', 'content', 'blocks', 'in_python_block',
+        'parent', 'dependencies', 'indent', 'settings'
     ]
 
     def __init__(
-        self, name, elements, in_python_block=False, parent=None, source=None,
-        line_start=1, **settings
+        self,
+        name,
+        elements,
+        in_python_block=False,
+        parent=None,
+        source=None,
+        line_start=1,
+        **settings
     ):
         self._id = uuid.uuid4().hex
         self.name = name
@@ -66,11 +50,21 @@ class State:
         self.blocks = {}
         self.dependencies = []
         self.indent = 0
-        self.new_line = True
+        if self.elements and not self.elements[0] and not self.in_python_block:
+            self.elements.pop(0)
+            self.swap_block_type()
+            if len(self.elements) > 1 and not self.elements[-1]:
+                self.elements.pop()
 
     def __call__(
-        self, name=None, elements=None, in_python_block=None, parent=None,
-        source=None, line_start=None, **kwargs
+        self,
+        name=None,
+        elements=None,
+        in_python_block=None,
+        parent=None,
+        source=None,
+        line_start=None,
+        **kwargs
     ):
         name = name or self.name
         elements = self.elements if elements is None else elements
@@ -88,8 +82,14 @@ class State:
         if kwargs:
             settings.update(kwargs)
         return self.__class__(
-            name, elements, in_python_block, parent, source, line_start,
-            **settings)
+            name,
+            elements,
+            in_python_block=in_python_block,
+            parent=parent,
+            source=source,
+            line_start=line_start,
+            **settings
+        )
 
     def swap_block_type(self):
         self.in_python_block = not self.in_python_block
@@ -97,7 +97,8 @@ class State:
     def update_lines_count(self, additional_lines, offset=None):
         start = self.lines.end if offset is None else offset
         self.lines = self.lines._replace(
-            start=start, end=start + additional_lines)
+            start=start, end=start + additional_lines
+        )
 
     def __getattr__(self, name):
         return self.settings.get(name)
@@ -105,25 +106,23 @@ class State:
 
 class Context:
     def __init__(
-        self, parser, name, text, scope, writer_node_cls, escape_node_cls,
-        html_node_cls, htmlpre_node_cls
+        self, parser, name, text, scope,
+        writer_node_cls, plain_node_cls
     ):
         self.parser = parser
         self.stack = []
         self.scope = scope
         self.state = State(
             name,
-            self.parser._tag_split_text(text),
+            Elements(self.parser._tag_split_text(text)).to_list(),
             source=name,
-            isolated_pyblockstate=True
+            isolated_pyblockstate=True,
+            new_line=False
         )
         self.contents_map = {}
         self.blocks_tree = {}
         self._writer_node_cls = writer_node_cls
-        self._escape_node_cls = escape_node_cls
-        self._html_node_cls = html_node_cls
-        self._htmlpre_node_cls = htmlpre_node_cls
-        self._in_html_pre = False
+        self._plain_node_cls = plain_node_cls
 
     @property
     def name(self):
@@ -158,7 +157,10 @@ class Context:
         kwargs['source'] = file_path
         kwargs['in_python_block'] = False
         return self(
-            name=name, elements=self.parser._tag_split_text(text), **kwargs)
+            name=name,
+            elements=Elements(self.parser._tag_split_text(text)).to_list(),
+            **kwargs
+        )
 
     def end_current_step(self):
         self.state.elements = []
@@ -194,11 +196,13 @@ class Context:
         self.content.append(node)
         return node
 
-    def variable(self, value=None, escape=True):
-        node_cls = self._escape_node_cls if escape else self._writer_node_cls
-        node = node_cls(
-            value, indent=self.state.indent, new_line=self.state.new_line,
-            source=self.state.source, lines=self.state.lines)
+    def variable(self, value=None):
+        node = self._writer_node_cls(
+            value,
+            indent=self.state.indent,
+            source=self.state.source,
+            lines=self.state.lines
+        )
         self.content.append(node)
         return node
 
@@ -207,14 +211,19 @@ class Context:
         self.content.append(node)
         return node
 
-    def html(self, value):
-        node_cls = (
-            self._html_node_cls if not self._in_html_pre else
-            self._htmlpre_node_cls)
+    def _plain(self, node_cls, value, **kwargs):
         self.content.append(
             node_cls(
-                value, indent=self.state.indent, new_line=self.state.new_line,
-                source=self.state.source, lines=self.state.lines))
+                value,
+                indent=self.state.indent,
+                source=self.state.source,
+                lines=self.state.lines,
+                **kwargs
+            )
+        )
+
+    def plain(self, value):
+        self._plain(self._plain_node_cls, value)
 
     def parse(self):
         while self.elements:
@@ -222,14 +231,40 @@ class Context:
             if self.state.in_python_block:
                 self.parser.parse_python_block(self, element)
             else:
-                self.parser.parse_html_block(self, element)
+                self.parser.parse_plain_block(self, element)
             self.swap_block_type()
 
     def ignore(self):
         while self.elements:
             element = self.elements.pop(0)
             if self.state.in_python_block:
-                self.parser.ignore_block(self, element)
+                self.parser.parse_raw_block(self, element)
             else:
-                self.parser.parse_html_block(self, element)
+                self.parser.parse_plain_block(self, element)
             self.swap_block_type()
+
+
+class HTMLContext(Context):
+    def __init__(
+        self, parser, name, text, scope,
+        writer_node_cls, plain_node_cls, escape_node_cls
+    ):
+        super().__init__(
+            parser, name, text, scope,
+            writer_node_cls, plain_node_cls
+        )
+        self._escape_node_cls = escape_node_cls
+
+    def variable(self, value=None, escape=True):
+        node_cls = self._escape_node_cls if escape else self._writer_node_cls
+        node = node_cls(
+            value,
+            indent=self.state.indent,
+            source=self.state.source,
+            lines=self.state.lines
+        )
+        self.content.append(node)
+        return node
+
+    def html(self, value):
+        return self.plain(value)

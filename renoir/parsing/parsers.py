@@ -14,22 +14,19 @@ import re
 
 from ..errors import TemplateError
 from .contents import (
-    WriterNode, EscapeNode, HTMLNode,
-    PrettyWriterNode, PrettyEscapeNode, PrettyHTMLNode, PrettyHTMLPreNode
+    WriterNode, PlainNode, WrappedNode, HTMLEscapeNode
 )
 from .lexers import default_lexers
-from .stack import Context
+from .stack import Context, HTMLContext
 
 
 class TemplateParser:
     _nodes_cls = {
         'writer': WriterNode,
-        'escape': EscapeNode,
-        'html': HTMLNode,
-        'htmlpre': HTMLNode
+        'plain': PlainNode
     }
 
-    r_multiline = re.compile(r'(""".*?""")|(\'\'\'.*?\'\'\')', re.DOTALL)
+    re_multiline = re.compile(r'(""".*?""")|(\'\'\'.*?\'\'\')', re.DOTALL)
 
     #: re-indentation rules
     re_auto_dedent = re.compile(
@@ -89,17 +86,21 @@ class TemplateParser:
         text = self.templater.prerender(text, file_path)
         return filename, file_path, text
 
-    def parse_html_block(self, ctx, element):
-        lines = element.split("\n")
-        ctx.update_lines_count(len(lines) - 1)
-        new_lines = [line for line in lines if line]
-        if new_lines:
-            ctx.html('\n'.join(new_lines))
+    def parse_plain_block(self, ctx, element):
+        ctx.update_lines_count(element.linesn)
+        ctx.plain(element)
 
+    #: get rid of delimiters
     def _get_python_block_text(self, element):
-        return element[self.delimiters_len[0]:-self.delimiters_len[1]].strip()
+        return element.text[
+            self.delimiters_len[0]:-self.delimiters_len[1]
+        ].strip()
 
-    def _parse_python_line(self, ctx, line):
+    #: escape new lines on python comment blocks
+    def _escape_python_multiline_newlines(self, text):
+        return re.sub(self.re_multiline, _escape_newlines, text)
+
+    def _parse_python_line(self, ctx, element, line):
         #: get line components for lexers
         if line.startswith('='):
             lex, value = '=', line[1:].strip()
@@ -114,47 +115,45 @@ class TemplateParser:
         #: use appropriate lexer if available for current lex
         lexer = self.lexers.get(lex)
         if lexer and not value.startswith('='):
+            if lexer.remove_line:
+                element.strip()
             lexer(ctx, value=value)
             return
         #: otherwise add as a python node
+        element.strip()
         ctx.python_node(line)
 
     def parse_python_block(self, ctx, element):
-        #: get rid of delimiters
         text = self._get_python_block_text(element)
         if not text:
             return
-        ctx.update_lines_count(len(text.split('\n')) - 1)
-        #: escape new lines on comment blocks
-        text = re.sub(self.r_multiline, _escape_newlines, text)
-        #: parse block lines
-        lines = text.split('\n')
-        for line in lines:
-            self._parse_python_line(ctx, line.strip())
+        ctx.update_lines_count(element.linesn)
+        for line in self._escape_python_multiline_newlines(text).split('\n'):
+            self._parse_python_line(ctx, element, line.strip())
 
-    def _parse_plain_contents(self, ctx, stripped, original):
-        if stripped == 'end':
-            #: use appropriate lexer if available for current lex
-            lexer = self.lexers.get(stripped)
+    def _parse_raw_contents(self, ctx, element, parsed):
+        #: use appropriate lexer
+        if parsed == 'end':
+            lexer = self.lexers[parsed]
+            if lexer.remove_line:
+                element.strip()
             lexer(ctx, value=None)
             return
         #: otherwise add as a plain node
-        ctx.html(original)
+        ctx.plain(element)
 
-    def ignore_block(self, ctx, element):
-        #: get rid of delimiters
+    def parse_raw_block(self, ctx, element):
         text = self._get_python_block_text(element)
         if not text:
             return
-        ctx.update_lines_count(len(text.split('\n')) - 1)
-        #: parse block lines
-        self._parse_plain_contents(ctx, text.strip(), element)
+        ctx.update_lines_count(element.linesn)
+        self._parse_raw_contents(ctx, element, text.strip())
 
     def _build_ctx(self, text):
         return Context(
-            self, self.name, text, self.scope, self._nodes_cls['writer'],
-            self._nodes_cls['escape'], self._nodes_cls['html'],
-            self._nodes_cls['htmlpre']
+            self, self.name, text, self.scope,
+            writer_node_cls=self._nodes_cls['writer'],
+            plain_node_cls=self._nodes_cls['plain']
         )
 
     def parse(self, text):
@@ -201,66 +200,75 @@ class TemplateParser:
         return '\n'.join(new_lines)
 
     def render(self):
-        return self.reindent(self.content.render(self))
+        rv = self.reindent(self.content.render(self))
+        return rv
 
 
-class PrettyTemplateParser(TemplateParser):
+class IndentTemplateParser(TemplateParser):
+    re_wspace = re.compile("^( *)")
+
+    def parse_plain_block(self, ctx, element):
+        lines_element = element.split()
+        ctx.update_lines_count(lines_element.linesn)
+        for line in lines_element.lines:
+            indent = len(self.re_wspace.search(line.text).group(0))
+            ctx.state.indent = indent
+            line.text = line.text[indent:]
+            line.indent = ctx.state.indent
+        ctx._plain(WrappedNode, lines_element)
+
+
+class HTMLTemplateParser(TemplateParser):
     _nodes_cls = {
-        'writer': PrettyWriterNode,
-        'escape': PrettyEscapeNode,
-        'html': PrettyHTMLNode,
-        'htmlpre': PrettyHTMLPreNode
+        'writer': WriterNode,
+        'plain': PlainNode,
+        'escape': HTMLEscapeNode
     }
 
-    r_wspace = re.compile("^( *)")
+    def _build_ctx(self, text):
+        return HTMLContext(
+            self, self.name, text, self.scope,
+            writer_node_cls=self._nodes_cls['writer'],
+            plain_node_cls=self._nodes_cls['plain'],
+            escape_node_cls=self._nodes_cls['escape']
+        )
 
+
+class HTMLIndentTemplateParser(HTMLTemplateParser, IndentTemplateParser):
     @staticmethod
-    def _check_html_pre(ctx, line):
-        if not ctx._in_html_pre and '<pre' in line and '</pre>' not in line:
+    def _html_pre_limiters(ctx, line):
+        if not ctx.state.in_html_pre and '<pre' in line and '</pre>' not in line:
             return True, False
-        if ctx._in_html_pre and '</pre>' in line:
+        if ctx.state.in_html_pre and '</pre>' in line:
             return False, True
         return False, False
 
     @staticmethod
     def _start_html_pre(ctx, start):
         if start:
-            ctx._in_html_pre = True
+            ctx.state.settings['in_html_pre'] = True
 
     @staticmethod
     def _end_html_pre(ctx, end):
         if end:
-            ctx._in_html_pre = False
+            ctx.state.settings['in_html_pre'] = False
 
-    def parse_html_block(self, ctx, element):
-        lines = element.split("\n")
-        ctx.update_lines_count(len(lines) - 1)
-        #: remove empty lines if needed
-        removed_last_line = False
-        if not lines[0]:
-            lines.pop(0)
-            ctx.state.new_line = True
-        if lines and not lines[-1]:
-            lines.pop()
-            removed_last_line = True
-        #: process lines
-        line = None
-        for line in lines:
-            empty_line = not line
-            indent = len(self.r_wspace.search(line).group(0))
-            start_pre, end_pre = self._check_html_pre(ctx, line)
-            self._end_html_pre(ctx, end_pre)
-            line = line[indent:]
+    def parse_plain_block(self, ctx, element):
+        lines_element = element.split()
+        ctx.update_lines_count(lines_element.linesn)
+        for line in lines_element.lines:
+            indent = len(self.re_wspace.search(line.text).group(0))
             ctx.state.indent = indent
-            if line or empty_line:
-                ctx.html(line)
+            start_pre, end_pre = self._html_pre_limiters(ctx, line.text)
+            self._end_html_pre(ctx, end_pre)
+            line.text = line.text[indent:]
+            line.indent = ctx.state.indent
+            line.ignore_reindent = (
+                ctx.state.in_html_pre if not line.ignore_reindent else
+                line.ignore_reindent
+            )
             self._start_html_pre(ctx, start_pre)
-            ctx.state.new_line = True
-        #: set correct `new_line` state depending on last line
-        if line and not removed_last_line:
-            ctx.state.new_line = False
-        else:
-            ctx.state.new_line = True
+        ctx._plain(WrappedNode, lines_element)
 
 
 def _escape_newlines(re_val):

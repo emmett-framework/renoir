@@ -1,0 +1,19 @@
+str: {{ ="str" }}
+int: {{ =1 }}
+float: {{ =1.2 }}
+sfloat: "{{ =1.2 }}"
+obj:
+  nested:
+    {{ ="key" }}: str
+    array:
+      {{ for el in ["foo", "bar"]: }}
+      - {{ =el }}
+      {{ pass }}
+  array:
+    - foo
+    - foo: bar
+      {{ ="array" }}:
+        - {{ ="str" }}
+        - foo
+        - {{ =1 }}
+        - {{ =2.4 / 2 }}

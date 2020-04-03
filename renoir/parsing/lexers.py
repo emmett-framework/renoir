@@ -16,6 +16,7 @@ from .stack import Context
 
 class Lexer:
     evaluate: bool = False
+    remove_line: bool = False
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
@@ -36,6 +37,8 @@ class VariableLexer(Lexer):
 
 
 class BlockLexer(Lexer):
+    remove_line = True
+
     def process(self, ctx, value):
         #: create a new stack element with name
         with ctx(value):
@@ -43,12 +46,16 @@ class BlockLexer(Lexer):
 
 
 class EndLexer(Lexer):
+    remove_line = True
+
     def process(self, ctx, value):
         #: we are done with this node, move up in the stack
         ctx.end_current_step()
 
 
 class SuperLexer(Lexer):
+    remove_line = True
+
     def process(self, ctx, value):
         #: create a node for later injection by super block
         target_block = value if value else ctx.name
@@ -83,6 +90,8 @@ class IncludeLexer(Lexer):
 
 
 class ExtendLexer(Lexer):
+    remove_line = True
+
     def process(self, ctx, value):
         #: extend the proper template
         with ctx.load(
@@ -119,6 +128,8 @@ class ExtendLexer(Lexer):
 
 
 class IgnoreLexer(Lexer):
+    remove_line = True
+
     def process(self, ctx, value):
         with ctx('__ignore__'):
             ctx.ignore()

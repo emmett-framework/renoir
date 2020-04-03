@@ -1,0 +1,16 @@
+<div>
+    <pre>
+        <code>
+var foo = 'foo';
+{{ raw }}
+var bar = '{{ bar }}';
+{{ end }}
+var baz = 'baz';
+var list = [
+    {{ for idx in range(0, 2): }}
+    '{{ =idx }}',
+    {{ pass }}
+];
+        </code>
+    </pre>
+</div>

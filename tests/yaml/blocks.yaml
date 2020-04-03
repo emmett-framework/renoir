@@ -1,0 +1,13 @@
+str: {{ ="str" }}
+int: {{ =1 }}
+float: {{ =1.2 }}
+sfloat: "{{ =1.2 }}"
+obj:
+  nested:
+    {{ block nested }}
+    {{ end }}
+  array:
+    - foo
+    - foo: bar
+      array: {{ block array }}[]{{ end }}
+{{ include }}

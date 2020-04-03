@@ -20,19 +20,22 @@ from .debug import make_traceback
 from .errors import TemplateError, TemplateMissingError, TemplateSyntaxError
 from .extensions import Extension
 from .helpers import TemplateReference, ParserCtx, adict
-from .parsing import Lexer, TemplateParser, PrettyTemplateParser
+from .parsing import (
+    Lexer,
+    TemplateParser,
+    IndentTemplateParser,
+    HTMLTemplateParser,
+    HTMLIndentTemplateParser
+)
 from .typing import LoaderType, RenderType, ContextType
 from .writers import (
-    Writer, EscapeAllWriter,
-    IndentWriter, EscapeAllIndentWriter
+    Writer,
+    EscapeAllWriter
 )
 
 
 class Renoir:
-    _writers = {
-        'basic': {'common': Writer, 'all': EscapeAllWriter},
-        'pretty': {'common': IndentWriter, 'all': EscapeAllIndentWriter}
-    }
+    _writers = {'common': Writer, 'all': EscapeAllWriter}
 
     def __init__(
         self,
@@ -42,8 +45,9 @@ class Renoir:
         contexts: Optional[List[ContextType]] = None,
         lexers: Optional[Dict[str, Lexer]] = None,
         encoding: str = 'utf8',
+        mode: str = 'html',
         escape: str = 'common',
-        prettify: bool = False,
+        adjust_indent: bool = False,
         reload: bool = False,
         debug: bool = False
     ):
@@ -53,22 +57,28 @@ class Renoir:
         self.contexts = contexts or []
         self.lexers = lexers or {}
         self.encoding = encoding
+        self.mode = mode
         self.escape = escape
-        self.prettify = prettify
+        self.indent = adjust_indent
         self.cache = TemplaterCache(self, reload=reload or debug)
         self._extensions = []
         self._extensions_env = {}
         self._configure()
 
     def _configure(self):
-        writer_group_key = 'pretty' if self.prettify else 'basic'
-        writer_group = self._writers[writer_group_key]
-        self.writer_cls = writer_group.get(
-            self.escape, writer_group['common']
+        self.writer_cls = self._writers.get(
+            self.escape, self._writers['common']
         )
-        self.parser_cls = (
-            PrettyTemplateParser if self.prettify else TemplateParser
-        )
+        if not self.indent:
+            self.parser_cls = (
+                HTMLTemplateParser if self.mode == 'html' else
+                TemplateParser
+            )
+        else:
+            self.parser_cls = (
+                HTMLIndentTemplateParser if self.mode == 'html' else
+                IndentTemplateParser
+            )
         self.preload = self._preload if self.loaders else self._no_preload
 
     def __init_extension(self, ext_cls):

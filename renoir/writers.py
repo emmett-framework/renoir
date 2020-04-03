@@ -46,28 +46,6 @@ class Writer:
         self.write(self._escape_data(data))
 
 
-class IndentWriter(Writer):
-    avoid_first_prepend = True
-
-    def __init__(self):
-        super().__init__()
-        self.write = (
-            self._write_first if self.avoid_first_prepend else self._write)
-
-    def _write_first(self, data, indent=0, prepend=''):
-        self.body.write(' ' * indent)
-        self.body.write(self._to_unicode(data))
-        self.write = self._write
-
-    def _write(self, data, indent=0, prepend=''):
-        self.body.write(prepend)
-        self.body.write(' ' * indent)
-        self.body.write(self._to_unicode(data))
-
-    def escape(self, data, indent=0, prepend=''):
-        self.write(self._escape_data(data), indent, prepend)
-
-
 class EscapeAll:
     @staticmethod
     def _to_html(data):
@@ -76,8 +54,4 @@ class EscapeAll:
 
 
 class EscapeAllWriter(EscapeAll, Writer):
-    pass
-
-
-class EscapeAllIndentWriter(EscapeAll, IndentWriter):
     pass
