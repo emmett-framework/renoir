@@ -9,8 +9,6 @@
     :license: BSD-3-Clause
 """
 
-from __future__ import annotations
-
 import uuid
 
 from collections import namedtuple

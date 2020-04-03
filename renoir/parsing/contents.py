@@ -9,8 +9,6 @@
     :license: BSD-3-Clause
 """
 
-from __future__ import annotations
-
 from collections.abc import Sequence
 from typing import List, Optional
 
@@ -25,7 +23,7 @@ class Element:
         'nlb', 'nle', 'striplb', 'striple'
     ]
 
-    def __init__(self, ctx: Elements, idx: int, text: str):
+    def __init__(self, ctx: 'Elements', idx: int, text: str):
         self.ctx = ctx
         self.idx = idx
         self.text = text
@@ -76,7 +74,7 @@ class Element:
             prev_element.striple = True
             next_element.striplb = True
 
-    def split(self) -> ElementSplitted:
+    def split(self) -> 'ElementSplitted':
         return ElementSplitted(self)
 
     def __str__(self) -> str:
