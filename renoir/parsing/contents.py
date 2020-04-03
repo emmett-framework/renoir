@@ -42,13 +42,13 @@ class Element:
         if self.prev() is None:
             self.nle = True
 
-    def prev(self) -> Optional[Element]:
+    def prev(self) -> Optional['Element']:
         try:
             return self.ctx[self.idx - 1]
         except IndexError:
             return None
 
-    def next(self) -> Optional[Element]:
+    def next(self) -> Optional['Element']:
         try:
             return self.ctx[self.idx + 1]
         except IndexError:
