@@ -95,7 +95,7 @@ Then we can build a child template in *index.html* file:
     <style type="text/css">
         .title { color: #336699; }
     </style>
-{{ endblock }}
+{{ end }}
 
 <h1>Index</h1>
 <p class="title">
@@ -150,7 +150,7 @@ Then your pages can define the variables before extending:
     <style type="text/css">
         .title { color: #336699; }
     </style>
-{{ endblock }}
+{{ end }}
 
 <h1>Index</h1>
 <p class="title">
