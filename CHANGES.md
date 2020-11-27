@@ -1,6 +1,14 @@
 Renoir changelog
 ================
 
+Version 1.3
+-----------
+
+*Released on November 27th 2020*
+
+- Added support for relative paths in `extend`, `include` lexers
+- Added Python 3.9 support
+
 Version 1.2
 -----------
 
