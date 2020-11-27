@@ -12,6 +12,8 @@
 import os
 import re
 
+from pathlib import Path
+
 from ..errors import TemplateError
 from .contents import (
     WriterNode, PlainNode, WrappedNode, HTMLEscapeNode
@@ -67,15 +69,21 @@ class TemplateParser:
     def _tag_split_text(self, text):
         return self.r_tag.split(text.replace('\t', '    '))
 
-    def _get_file_text(self, ctx, filename):
+    def _get_file_text(self, ctx, filename, ctxpath=None):
         #: remove quotation from filename string
         try:
             filename = eval(filename, self.scope)
         except Exception:
             raise TemplateError(
                 'Invalid template filename', ctx.state.source, ctx.state.lines)
+        #: resolve paths
+        preload_params = {}
+        if any(filename.startswith(relpath) for relpath in ["./", "../"]):
+            full_path = (ctxpath / Path(filename)).resolve()
+            preload_params["path"] = full_path.parent
+            filename = full_path.name
         #: get the file contents
-        path, file_name = self.templater.preload(filename)
+        path, file_name = self.templater.preload(filename, **preload_params)
         file_path = os.path.join(path, file_name)
         try:
             text = self.templater.load(file_path)

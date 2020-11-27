@@ -111,16 +111,17 @@ class Renoir:
         self._configure()
         return ext
 
-    def _preload(self, file_name):
+    def _preload(self, file_name, path=None):
+        path = path or self.path
         file_extension = os.path.splitext(file_name)[1]
         return reduce(
             lambda args, loader: loader(args[0], args[1]),
             self.loaders.get(file_extension, []),
-            (self.path, file_name)
+            (path, file_name)
         )
 
-    def _no_preload(self, file_name):
-        return self.path, file_name
+    def _no_preload(self, file_name, path=None):
+        return (path or self.path, file_name)
 
     def _load(self, file_path):
         with open(file_path, 'r', encoding=self.encoding) as file_obj:

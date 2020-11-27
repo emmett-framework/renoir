@@ -12,6 +12,7 @@
 import uuid
 
 from collections import namedtuple
+from pathlib import Path
 
 from .contents import Content, Elements, Node, NodeGroup
 
@@ -127,6 +128,10 @@ class Context:
         return self.state.name
 
     @property
+    def cwd(self):
+        return Path(self.state.source).parent
+
+    @property
     def content(self):
         return self.state.content
 
@@ -150,7 +155,9 @@ class Context:
         return self
 
     def load(self, name, **kwargs):
-        name, file_path, text = self.parser._get_file_text(self, name)
+        name, file_path, text = self.parser._get_file_text(
+            self, name, ctxpath=self.cwd
+        )
         self.state.dependencies.append(name)
         kwargs['source'] = file_path
         kwargs['in_python_block'] = False
