@@ -11,6 +11,8 @@
 
 from enum import Enum
 
+NOFILEPATH = "<string>"
+
 
 class MODES(str, Enum):
     html = "html"

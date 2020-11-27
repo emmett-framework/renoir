@@ -16,7 +16,7 @@ from functools import reduce
 from typing import Any, Dict, List, Optional, Type
 
 from .cache import TemplaterCache
-from .constants import MODES, ESCAPES
+from .constants import MODES, ESCAPES, NOFILEPATH
 from .debug import make_traceback
 from .errors import TemplateError, TemplateMissingError, TemplateSyntaxError
 from .extensions import Extension
@@ -180,7 +180,7 @@ class Renoir:
         for injector in self.contexts:
             injector(context)
 
-    def _render(self, source='', file_path='<string>', context=None):
+    def _render(self, source='', file_path=NOFILEPATH, context=None):
         context = context or {}
         context['__writer__'] = self.writer_cls()
         try:
