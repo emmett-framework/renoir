@@ -35,6 +35,7 @@ class State:
         parent=None,
         source=None,
         line_start=1,
+        blocks=None,
         **settings
     ):
         self._id = uuid.uuid4().hex
@@ -46,7 +47,7 @@ class State:
         self.lines = ParsedLines(line_start, line_start)
         self.settings = settings
         self.content = Content()
-        self.blocks = {}
+        self.blocks = blocks if blocks is not None else {}
         self.dependencies = []
         self.indent = 0
         if self.elements and not self.elements[0] and not self.in_python_block:
@@ -118,8 +119,7 @@ class Context:
             isolated_pyblockstate=True,
             new_line=False
         )
-        self.contents_map = {}
-        self.blocks_tree = {}
+        self.nodes_map = {}
         self._writer_node_cls = writer_node_cls
         self._plain_node_cls = plain_node_cls
 
@@ -178,8 +178,7 @@ class Context:
             raise
         self.swap_block_type()
         deps = list(self.state.dependencies)
-        blocks = self.state.blocks
-        contents = list(self.content._contents)
+        contents = self.content.contents
         name = self.name
         lines = self.state.lines
         in_python_block = self.state.in_python_block
@@ -191,10 +190,9 @@ class Context:
             self.state.in_python_block = in_python_block
             self.update_lines_count(
                 lines.end - lines.start, offset=lines.end)
-        self.blocks_tree.update(blocks)
         self.state.blocks[name] = state_id
         self.state.dependencies.extend(deps)
-        self.contents_map[state_id] = node
+        self.nodes_map[state_id] = node
 
     def python_node(self, value=None):
         node = Node(value, source=self.state.source, lines=self.state.lines)

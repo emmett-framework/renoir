@@ -1,0 +1,13 @@
+{{ extend parent_name }}
+child l1
+{{ block b1 }}
+child b1
+{{ end }}
+{{ block b2 }}
+{{ super }}
+child b2
+{{ end }}
+child l2
+{{ block b3 }}
+child l3
+{{ end }}

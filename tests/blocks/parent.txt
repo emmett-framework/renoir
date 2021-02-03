@@ -1,0 +1,4 @@
+{{ block b2 }}
+super b2
+{{ end }}
+{{ include }}

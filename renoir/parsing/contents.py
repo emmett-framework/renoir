@@ -181,10 +181,11 @@ class Elements(Sequence):
 
 
 class Content:
-    __slots__ = ['_contents']
+    __slots__ = ['_contents', '_evicted']
 
     def __init__(self):
         self._contents = []
+        self._evicted = False
 
     def append(self, element):
         self._contents.append(element)
@@ -193,8 +194,15 @@ class Content:
         for element in elements:
             self.append(element)
 
+    def evict(self):
+        self._evicted = True
+
+    @property
+    def contents(self):
+        return [] if self._evicted else list(self._contents)
+
     def render(self, parser):
-        return ''.join(
+        return '' if self._evicted else ''.join(
             element.__render__(parser) for element in self._contents
         )
 
@@ -233,11 +241,11 @@ class Node:
 
 
 class NodeGroup(Node):
-    __slots__ = ['value', 'indent', 'source', 'lines']
+    __slots__ = ['value', 'indent', 'source', 'lines', '_evicted']
 
     def __init__(self, value=None, **kwargs):
-        value = value or []
-        super().__init__(value, **kwargs)
+        super().__init__(value or [], **kwargs)
+        self._evicted = False
 
     def increment_children_indent(self, increment):
         for element in self.value:
@@ -252,8 +260,13 @@ class NodeGroup(Node):
         self.increment_children_indent(diff)
         self.indent = indent
 
+    def evict(self):
+        self._evicted = True
+
     def __render__(self, parser):
-        return ''.join(element.__render__(parser) for element in self.value)
+        return '' if self._evicted else ''.join(
+            element.__render__(parser) for element in self.value
+        )
 
     def __reference__(self):
         rv = []

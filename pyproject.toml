@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "Renoir"
-version = "1.3.0"
+version = "1.3.1"
 description = "A templating engine designed with simplicity in mind"
 authors = ["Giovanni Barillari <gi0baro@d4net.org>"]
 license = "BSD-3-Clause"

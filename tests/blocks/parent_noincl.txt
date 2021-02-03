@@ -1,0 +1,16 @@
+{{ extend "./parent.txt" }}
+parent l1
+{{ block b1 }}
+parent b1
+{{ end }}
+{{ block b2 }}
+{{ super }}
+parent b2
+{{ end }}
+parent l2
+{{ block b3 }}
+parent l3
+{{ end }}
+{{ block b4 }}
+parent l4
+{{ end }}
