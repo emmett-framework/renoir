@@ -1,6 +1,13 @@
 Renoir changelog
 ================
 
+Version 1.4
+-----------
+
+*Released on June 1st 2021*
+
+- Added `delimiters` parameter to `Renoir` constructor
+
 Version 1.3
 -----------
 
