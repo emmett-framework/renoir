@@ -13,7 +13,7 @@ import os
 import sys
 
 from functools import reduce
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 from .cache import TemplaterCache
 from .constants import MODES, ESCAPES, NOFILEPATH
@@ -45,6 +45,7 @@ class Renoir:
         renderers: Optional[List[RenderType]] = None,
         contexts: Optional[List[ContextType]] = None,
         lexers: Optional[Dict[str, Lexer]] = None,
+        delimiters: Tuple[str, str] = ('{{', '}}'),
         encoding: str = 'utf8',
         mode: str = MODES.html,
         escape: str = ESCAPES.common,
@@ -57,6 +58,7 @@ class Renoir:
         self.renderers = renderers or []
         self.contexts = contexts or []
         self.lexers = lexers or {}
+        self.delimiters = delimiters
         self.encoding = encoding
         self.mode = mode
         self.escape = escape
@@ -160,7 +162,8 @@ class Renoir:
                 source,
                 name=file_path,
                 scope=context,
-                lexers=self.lexers
+                lexers=self.lexers,
+                delimiters=self.delimiters
             )
             try:
                 code = compile(

@@ -56,13 +56,17 @@ class TemplateParser:
         #: configure delimiters
         self.delimiters = delimiters
         escaped_delimiters = (
-            re.escape(delimiters[0]), re.escape(delimiters[1]))
+            re.escape(delimiters[0]), re.escape(delimiters[1])
+        )
         self.r_tag = re.compile(
             r'((?<!%s)%s.*?%s(?!%s))' % (
                 escaped_delimiters[0][0:2], escaped_delimiters[0],
-                escaped_delimiters[1], escaped_delimiters[1][-2:]), re.DOTALL)
+                escaped_delimiters[1], escaped_delimiters[1][-2:]),
+            re.DOTALL
+        )
         self.delimiters_len = (
-            len(self.delimiters[0]), len(self.delimiters[1]))
+            len(self.delimiters[0]), len(self.delimiters[1])
+        )
         #: build content
         self.parse(text)
 
@@ -90,7 +94,8 @@ class TemplateParser:
         except Exception:
             raise TemplateError(
                 'Unable to open included view file',
-                ctx.state.source, ctx.state.lines)
+                ctx.state.source, ctx.state.lines
+            )
         text = self.templater.prerender(text, file_path)
         return filename, file_path, text
 
@@ -181,17 +186,17 @@ class TemplateParser:
             if not line:
                 continue
             #: apply auto dedenting
-            if TemplateParser.re_auto_dedent.match(line):
+            if self.re_auto_dedent.match(line):
                 indent = indent + dedented - 1
             dedented = 0
             #: apply indentation
             indent = max(indent, 0)
             new_lines.append(' ' * (4 * indent) + line)
             #: dedenting on `pass`
-            if TemplateParser.re_pass.match(line):
+            if self.re_pass.match(line):
                 indent -= 1
             #: implicit dedent on specific commands
-            if TemplateParser.re_dedent.match(line):
+            if self.re_dedent.match(line):
                 dedented = 1
                 indent -= 1
             #: indenting on lines ending with `:`
@@ -200,10 +205,12 @@ class TemplateParser:
         #: handle indentation errors
         if indent > 0:
             raise TemplateError(
-                'missing "pass" in view', self.name, 1)
+                'missing "pass" in view', self.name, 1
+            )
         elif indent < 0:
             raise TemplateError(
-                'too many "pass" in view', self.name, 1)
+                'too many "pass" in view', self.name, 1
+            )
         #: rebuild text
         return '\n'.join(new_lines)
 
