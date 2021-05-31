@@ -1,7 +1,7 @@
 Extensions
 ==========
 
-Renoir extensions extend the functionality of Renoir in various different ways.
+Renoir extensions extend its functionalities in various different ways.
 
 Extensions are Python packages that can be downloaded with `pip`. When adding extensions to your application, it is a good habit to declare them as dependencies in your *requirements.txt* or *setup.py* file: this way, they can be installed with a simple command or when your application installs.
 
@@ -57,7 +57,7 @@ class Awesomeness(Extension):
     namespace = "Foobar"
 ```
 
-Now, let's see how to build an extension with an example: in particular, we want to build an extension that adds [Haml](http://weppy.org/extensions/haml) support to Renoir. Then we need to write a template extension that interact with templates with an *.haml* file extension and that provides the compiled html source in order to let Renoir understand the templates. We can start by writing:
+Now, let's see how to build an extension with an example: in particular, we want to build an extension that adds [Haml](https://haml.info/) support to Renoir. Then we need to write a template extension that interact with templates with an *.haml* file extension and that provides the compiled html source in order to let Renoir understand the templates. We can start by writing:
 
 ```python
 from renoir import Extension
@@ -91,8 +91,6 @@ where the `compile` method will be the one responsible to parse the haml code an
 ### Lexers
 
 Template extensions can also register *lexers*, which are the keyword used by Renoir in templates to render specific contents. 
-
-<!-- For example, the standard `include_static` keyword is a lexer that produce the appropriate `<link>` or `<script>` html objects. -->
 
 In order to create a new lexer, you have to use the `Lexer` class provided by Renoir. Let's say we want to create a shortcut to include images from some folder using this notation:
 

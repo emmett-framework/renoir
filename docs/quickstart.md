@@ -45,7 +45,7 @@ This means you can use anything from the standard library or the context you pas
 ```html
 <div class="posts">
     {{ for idx, post in enumerate(posts): }}
-    {{ cssclass = 'white' if idx % 0 else 'gray' }}
+    {{ cssclass = 'white' if idx % 2 else 'gray' }}
     <div class="post {{ =cssclass }}">
         <p>{{ =post['text'] }}</p>
     </div>
