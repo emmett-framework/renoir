@@ -43,7 +43,7 @@ include = [
 python = "^3.6"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.3"
+pytest = "^6.2"
 pylint = "^2.4.4"
 pyyaml = "^5.3.1"
 
