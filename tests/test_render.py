@@ -312,3 +312,19 @@ def test_blocks_noinclude(templater_blocks):
     assert "\n".join(
         filter(None, [l.rstrip() for l in r.splitlines()])
     ) == _target_b2[1:]
+
+
+_target_b3 = """
+parent l1
+child b1
+parent b2
+parent c1
+child l1
+parent l2"""
+
+
+def test_blocks_include_multi(templater_blocks):
+    r = templater_blocks.render('child_multi_incl.txt', {'condition': True})
+    assert "\n".join(
+        filter(None, [l.rstrip() for l in r.splitlines()])
+    ) == _target_b3[1:]

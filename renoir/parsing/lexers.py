@@ -73,6 +73,10 @@ class IncludeLexer(Lexer):
         #: otherwise, inject in the extended node
         else:
             extend_src = ctx.state.extend_map[ctx.state.source]
+            if extend_src._id in ctx.state.includes_parsed:
+                node = ctx.node_group(ctx.state.includes_parsed[extend_src._id].value)
+                node.increment_children_indent(ctx.state.indent)
+                return
             extend_src.swap_block_type()
             with ctx(
                 f"__include__{extend_src._id}",
@@ -90,6 +94,7 @@ class IncludeLexer(Lexer):
                 )
                 included_id = ctx.state._id
             ctx.state.implicit_extenders.pop(extend_src._id)
+            ctx.state.includes_parsed[extend_src._id] = ctx.nodes_map[included_id]
         ctx.nodes_map[included_id].increment_children_indent(ctx.state.indent)
 
 
@@ -103,6 +108,7 @@ class ExtendLexer(Lexer):
             blocks_map=ctx.state.blocks_map or {},
             extend_map=ctx.state.extend_map or {},
             implicit_extenders=ctx.state.implicit_extenders or {},
+            includes_parsed=ctx.state.includes_parsed or {},
             injections=ctx.state.injections or {}
         ):
             ctx.state.blocks_map[ctx.state.parent._id] = {}

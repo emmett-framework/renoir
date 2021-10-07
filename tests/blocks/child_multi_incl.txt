@@ -1,0 +1,7 @@
+{{ extend "./parent_multi_incl.txt" }}
+
+{{ block b1 }}
+child b1
+{{ end }}
+
+child l1
