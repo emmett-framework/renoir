@@ -22,10 +22,9 @@ jobs:
       - name: Setup Poetry
         run: |
           poetry config virtualenvs.in-project true
-          poetry config pypi-token.pypi $PUBLISH_TOKEN
       - name: Publish
         run: |
           poetry build
           poetry publish
         env:
-          PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
