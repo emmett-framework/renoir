@@ -1,6 +1,14 @@
 Renoir changelog
 ================
 
+Version 1.5
+-----------
+
+*Released on October 8th 2021*
+
+- Added Python 3.10 support
+- Added (experimental) support for multiple `include` no-argument lexer parsing
+
 Version 1.4
 -----------
 
