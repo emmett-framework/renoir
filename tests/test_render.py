@@ -96,6 +96,13 @@ obj:
     - foo
     - foo: bar
       array: []
+inclusion:
+  - inclusion_key: inclusion_val
+    inclusion_nest:
+      first: foo
+      second: bar
+
+    main_key: main_val
 added:
   indent:
     foo:
@@ -125,6 +132,8 @@ def test_plain_indent(templater_indent):
         yaml_indent_rendered[1:]
     data = yaml.load(r, Loader=yaml.SafeLoader)
     assert data['obj']['nested']['array'][1] == "bar"
+    assert data['inclusion'][0]['main_key'] == 'main_val'
+    assert data['inclusion'][0]['inclusion_nest']['first'] == 'foo'
     assert not data['obj']['array'][1]['array']
     assert data['added']['indent']['foo']['bar'][0] == "baz"
     assert data['added']['ints'][-1] == 8

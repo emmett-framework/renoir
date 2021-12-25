@@ -75,7 +75,7 @@ class IncludeLexer(Lexer):
             extend_src = ctx.state.extend_map[ctx.state.source]
             if extend_src._id in ctx.state.includes_parsed:
                 node = ctx.node_group(ctx.state.includes_parsed[extend_src._id].value)
-                node.increment_children_indent(ctx.state.indent)
+                node.increment_children_indent(ctx.state.indent + ctx.state.offset)
                 return
             extend_src.swap_block_type()
             with ctx(
@@ -95,7 +95,9 @@ class IncludeLexer(Lexer):
                 included_id = ctx.state._id
             ctx.state.implicit_extenders.pop(extend_src._id)
             ctx.state.includes_parsed[extend_src._id] = ctx.nodes_map[included_id]
-        ctx.nodes_map[included_id].increment_children_indent(ctx.state.indent)
+        ctx.nodes_map[included_id].increment_children_indent(
+            ctx.state.indent + ctx.state.offset
+        )
 
 
 class ExtendLexer(Lexer):

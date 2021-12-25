@@ -228,6 +228,7 @@ class IndentTemplateParser(TemplateParser):
         for line in lines_element.lines:
             indent = len(self.re_wspace.search(line.text).group(0))
             ctx.state.indent = indent
+            ctx.state.offset = len(line.text) - indent
             line.text = line.text[indent:]
             line.indent = ctx.state.indent
         ctx._plain(WrappedNode, lines_element)

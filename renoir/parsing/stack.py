@@ -24,7 +24,7 @@ class State:
     __slots__ = [
         '_id', 'name', 'source', 'lines',
         'elements', 'content', 'blocks', 'in_python_block',
-        'parent', 'dependencies', 'indent', 'settings'
+        'parent', 'dependencies', 'indent', 'offset', 'settings'
     ]
 
     def __init__(
@@ -50,6 +50,7 @@ class State:
         self.blocks = blocks if blocks is not None else {}
         self.dependencies = []
         self.indent = 0
+        self.offset = 0
         if self.elements and not self.elements[0] and not self.in_python_block:
             self.elements.pop(0)
             self.swap_block_type()
