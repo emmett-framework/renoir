@@ -157,7 +157,10 @@ class Context:
 
     def load(self, name, **kwargs):
         name, file_path, text = self.parser._get_file_text(
-            self, name, ctxpath=self.cwd
+            self,
+            name,
+            ctxpath=self.cwd,
+            strip_ending_new_line=kwargs.pop("strip_ending_new_line", False)
         )
         self.state.dependencies.append(name)
         kwargs['source'] = file_path

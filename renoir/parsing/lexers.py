@@ -67,7 +67,7 @@ class IncludeLexer(Lexer):
     def process(self, ctx, value):
         #: if we have a value, just add the new content
         if value:
-            with ctx.load(value):
+            with ctx.load(value, strip_ending_new_line=True):
                 ctx.parse()
                 included_id = ctx.state._id
         #: otherwise, inject in the extended node

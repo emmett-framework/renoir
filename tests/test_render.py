@@ -101,7 +101,6 @@ inclusion:
     inclusion_nest:
       first: foo
       second: bar
-
     main_key: main_val
 added:
   indent:
@@ -148,7 +147,6 @@ html_rendered = """
     </head>
     <body>
         <div>header1</div>
-
 <div>header2</div>
         <div class="page">
             <a href="/" class="title"><h1>Test</h1></a>
@@ -170,7 +168,6 @@ html_rendered = """
 
         </div>
         <div>footer</div>
-
     </body>
 </html>"""
 
@@ -194,7 +191,6 @@ html_indent_rendered = """
     </head>
     <body>
         <div>header1</div>
-
         <div>header2</div>
         <div class="page">
             <a href="/" class="title"><h1>Test</h1></a>
@@ -216,7 +212,6 @@ html_indent_rendered = """
 
         </div>
         <div>footer</div>
-
     </body>
 </html>"""
 

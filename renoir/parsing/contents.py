@@ -41,6 +41,8 @@ class Element:
             self.nle = True
         if self.prev() is None:
             self.nle = True
+        elif not text.strip(' ') and self.next() is None:
+            self.nlb = True
 
     def prev(self) -> Optional['Element']:
         try:

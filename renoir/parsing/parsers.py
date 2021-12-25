@@ -73,13 +73,14 @@ class TemplateParser:
     def _tag_split_text(self, text):
         return self.r_tag.split(text.replace('\t', '    '))
 
-    def _get_file_text(self, ctx, filename, ctxpath=None):
+    def _get_file_text(self, ctx, filename, ctxpath=None, strip_ending_new_line=False):
         #: remove quotation from filename string
         try:
             filename = eval(filename, self.scope)
         except Exception:
             raise TemplateError(
-                'Invalid template filename', ctx.state.source, ctx.state.lines)
+                'Invalid template filename', ctx.state.source, ctx.state.lines
+            )
         #: resolve paths
         preload_params = {}
         if any(filename.startswith(relpath) for relpath in ["./", "../"]):
@@ -97,6 +98,8 @@ class TemplateParser:
                 ctx.state.source, ctx.state.lines
             )
         text = self.templater.prerender(text, file_path)
+        if strip_ending_new_line and text.endswith("\n"):
+            text = text[:-1]
         return filename, file_path, text
 
     def parse_plain_block(self, ctx, element):
@@ -215,8 +218,7 @@ class TemplateParser:
         return '\n'.join(new_lines)
 
     def render(self):
-        rv = self.reindent(self.content.render(self))
-        return rv
+        return self.reindent(self.content.render(self))
 
 
 class IndentTemplateParser(TemplateParser):
