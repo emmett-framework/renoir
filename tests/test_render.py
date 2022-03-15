@@ -70,6 +70,11 @@ obj:
         - foo
         - 1
         - 1.2
+    - bar: foo bar
+    - bar2: foo foo2 bar
+    - bar3: foo foo2 bar bar2
+    - bar3: foo foo2 barbar2
+    - bar4: foo foo2 barbar2 bar3
 """
 
 
@@ -96,6 +101,11 @@ obj:
     - foo
     - foo: bar
       array: []
+    - bar: foo bar
+    - bar2: foo foo2 bar
+    - bar3: foo foo2 bar bar2
+    - bar3: foo foo2 barbar2
+    - bar4: foo foo2 barbar2 bar3
 inclusion:
   - inclusion_key: inclusion_val
     inclusion_nest:

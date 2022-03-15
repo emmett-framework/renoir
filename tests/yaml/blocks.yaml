@@ -10,4 +10,9 @@ obj:
     - foo
     - foo: bar
       array: {{ block array }}[]{{ end }}
+    - bar: {{ ="foo" }} bar
+    - bar2: {{ ="foo" }} foo2 {{ ="bar" }}
+    - bar3: {{ ="foo" }} foo2 {{ ="bar" }} bar2
+    - bar3: {{ ="foo" }} foo2 {{ ="bar" }}{{ ="bar2" }}
+    - bar4: {{ ="foo" }} foo2 {{ ="bar" }}{{ ="bar2" }} bar3
 {{ include }}

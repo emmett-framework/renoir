@@ -225,14 +225,22 @@ class IndentTemplateParser(TemplateParser):
     re_wspace = re.compile("^( *)")
 
     def parse_plain_block(self, ctx, element):
+        current_line, new_line = ctx.state.lines.end, False
         lines_element = element.split()
         ctx.update_lines_count(lines_element.linesn)
+        if ctx.state.lines.start != current_line:
+            new_line = True
         for line in lines_element.lines:
+            if line.offset:
+                new_line = True
+            if not new_line:
+                continue
             indent = len(self.re_wspace.search(line.text).group(0))
             ctx.state.indent = indent
             ctx.state.offset = len(line.text) - indent
             line.text = line.text[indent:]
             line.indent = ctx.state.indent
+            new_line = False
         ctx._plain(WrappedNode, lines_element)
 
 

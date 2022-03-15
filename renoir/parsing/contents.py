@@ -117,9 +117,10 @@ class ElementSplitted:
                 text=line,
                 indent=0,
                 original_indent=0,
-                ignore_reindent=False
+                ignore_reindent=False,
+                offset=idx
             )
-            for line in self.parent.text.split('\n')
+            for idx, line in enumerate(self.parent.text.split('\n'))
         ]
 
     @property
