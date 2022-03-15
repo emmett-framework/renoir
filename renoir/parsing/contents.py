@@ -18,72 +18,88 @@ from ..helpers import adict
 
 class Element:
     __slots__ = [
-        'ctx', 'idx', 'text',
+        'ctx', 'idx', 'text', 'is_python_block',
         'linesn', 'linesd',
-        'nlb', 'nle', 'striplb', 'striple'
+        'strippable_head', 'strippable_tail',
+        'stripped_head', 'stripped_tail',
+        'reindent_skip'
     ]
 
-    def __init__(self, ctx: 'Elements', idx: int, text: str):
+    def __init__(
+        self,
+        ctx: 'Elements',
+        idx: int,
+        text: str,
+        is_python_block: bool = False
+    ):
         self.ctx = ctx
         self.idx = idx
         self.text = text
-        self.nlb = False
-        self.nle = False
-        self.striplb = False
-        self.striple = False
+        self.is_python_block = is_python_block
         self.linesn = text.count('\n')
         self.linesd = self.linesn + 1
-        lsplit = text.split('\n', 1)
-        if len(lsplit) > 1 and not lsplit[0].strip(' '):
-            self.nlb = True
-        rsplit = text.rsplit('\n', 1)
-        if len(rsplit) > 1 and not rsplit[-1].rstrip(' '):
-            self.nle = True
-        if self.prev() is None:
-            self.nle = True
-        elif not text.strip(' ') and self.next() is None:
-            self.nlb = True
+        self.strippable_head = False
+        self.strippable_tail = False
+        self.stripped_head = False
+        self.stripped_tail = False
+        self.reindent_skip = False
+        if not text:
+            self.strippable_head = False
+            self.strippable_tail = False
+        else:
+            lsplit = text.split('\n', 1)
+            rsplit = text.rsplit('\n', 1)
+            if not lsplit[0].strip(' '):
+                self.strippable_head = True
+            if not rsplit[-1].strip(' '):
+                self.strippable_tail = True
 
-    def prev(self) -> Optional['Element']:
+    def prev(self, positions: int = 1) -> Optional['Element']:
+        idx = self.idx - positions
+        if idx < 0:
+            return None
         try:
-            return self.ctx[self.idx - 1]
+            return self.ctx[idx]
         except IndexError:
             return None
 
-    def next(self) -> Optional['Element']:
+    def next(self, positions: int = 1) -> Optional['Element']:
         try:
-            return self.ctx[self.idx + 1]
+            return self.ctx[self.idx + positions]
         except IndexError:
             return None
 
-    def strip_prev(self):
-        element = self.prev()
-        if element:
-            element.striple = True
-
-    def strip_next(self):
-        element = self.next()
-        if element:
-            element.striplb = True
-
-    def strip(self):
+    def strip(self, force_reindent_skip: bool = False):
         prev_element, next_element = self.prev(), self.next()
         if prev_element is None and next_element is not None:
-            if next_element.nlb:
-                next_element.striplb = True
+            next_element.strip_head()
+            next_element.reindent_skip = force_reindent_skip
             return
-        if prev_element.nle and next_element.nlb:
-            prev_element.striple = True
-            next_element.striplb = True
+        if next_element is None:
+            return
+        if prev_element.strippable_tail and next_element.strippable_head:
+            prev_element.strip_tail()
+            next_element.strip_head()
+            next_element.reindent_skip = force_reindent_skip
+
+    def strip_head(self):
+        if not self.strippable_head:
+            return
+        self.stripped_head = True
+
+    def strip_tail(self):
+        if not self.strippable_tail:
+            return
+        self.stripped_tail = True
 
     def split(self) -> 'ElementSplitted':
         return ElementSplitted(self)
 
     def __str__(self) -> str:
         rv = self.text
-        if self.striple and self.nle:
+        if self.stripped_tail:
             rv = rv.rsplit('\n', 1)[0] + '\n'
-        if self.striplb and self.nlb:
+        if self.stripped_head:
             rv = rv.split('\n', 1)[-1]
         return rv
 
@@ -97,11 +113,14 @@ class ElementSplitted:
     def __init__(self, parent: Element):
         self.parent = parent
         self.lines = [
-            adict(text=line, indent=0, ignore_reindent=False)
+            adict(
+                text=line,
+                indent=0,
+                original_indent=0,
+                ignore_reindent=False
+            )
             for line in self.parent.text.split('\n')
         ]
-        if not self.nlb:
-            self.lines[0].ignore_reindent = True
 
     @property
     def linesn(self) -> int:
@@ -111,57 +130,60 @@ class ElementSplitted:
     def linesd(self) -> int:
         return self.parent.linesd
 
-    @property
-    def nlb(self) -> bool:
-        return self.parent.nlb
-
-    @property
-    def nle(self) -> bool:
-        return self.parent.nle
-
-    @property
-    def striplb(self) -> bool:
-        return self.parent.striplb
-
-    @striplb.setter
-    def striplb(self, val: bool):
-        self.parent.striplb = val
-
-    @property
-    def striple(self) -> bool:
-        return self.parent.striple
-
-    @striple.setter
-    def striple(self, val: bool):
-        self.parent.striple = val
-
     def increment_indent(self, increment: int):
         for line in self.lines:
-            if line.ignore_reindent:
-                continue
             line.indent += increment
 
     def change_indent(self, indent: int):
         for line in self.lines:
-            if line.ignore_reindent:
-                continue
             line.indent = indent
+
+    def _has_reindent_arbiter(self):
+        if self.parent.reindent_skip:
+            return False
+        if (
+            self.parent.stripped_head and
+            self.parent.idx == self.parent.ctx.strip_arbiter.idx
+        ):
+            return True
+        rv, prev = False, self.parent.prev(2)
+        while prev is not None:
+            if prev.stripped_head and not prev.reindent_skip:
+                if prev.idx != self.parent.ctx.strip_arbiter.idx:
+                    prev = prev.prev(2)
+                else:
+                    rv = True
+                    break
+            else:
+                break
+        return rv
 
     def __str__(self) -> str:
         lines = []
-        for line in self.lines:
+        offsets = (
+            1 if self.parent.stripped_head else None,
+            -1 if self.parent.stripped_tail else None
+        )
+        if not self.parent.strippable_head and self.lines:
+            self.lines[0].ignore_reindent = True
+        if self.parent.stripped_head and self._has_reindent_arbiter():
+            self.lines[offsets[0] or 0].ignore_reindent = True
+        for line in self.lines[offsets[0]:offsets[1]]:
             lines.append(
                 "{pre}{text}".format(
-                    pre=" " * line.indent,
+                    pre=(
+                        " " * line.original_indent if line.ignore_reindent else
+                        " " * line.indent
+                    ),
                     text=line.text
                 )
             )
-        if self.striple and self.nle:
-            lines.pop()
+        if self.parent.stripped_tail:
             lines.append("")
-        if self.striplb and self.nlb:
-            lines.pop(0)
         return "\n".join(lines)
+
+    def __bool__(self) -> bool:
+        return bool(str(self))
 
 
 class Elements(Sequence):
@@ -169,8 +191,26 @@ class Elements(Sequence):
 
     def __init__(self, elements: List[str]):
         self.data = []
-        for element in elements:
-            self.data.append(Element(self, len(self.data), element))
+        in_python_block = False
+        offsets = [None, None]
+        if len(elements) > 1:
+            if not elements[0]:
+                offsets[0] = 1
+                in_python_block = True
+            if not elements[-1]:
+                offsets[1] = -1
+        for idx, element in enumerate(elements[offsets[0]:offsets[1]]):
+            self.data.append(Element(self, idx, element, in_python_block))
+            in_python_block = not in_python_block
+
+    @property
+    def strip_arbiter(self):
+        if not self.data:
+            return None
+        if not self.data[0].is_python_block:
+            return self.data[0]
+        if len(self.data) > 1:
+            return self.data[1]
 
     def __len__(self) -> int:
         return len(self.data)
@@ -286,8 +326,9 @@ class WriterNode(Node):
 
     def __render__(self, parser):
         return ''.join([
-            '\n', parser.writer, '.', self._writer_method, '(',
-            to_unicode(self.render_value()), ')'])
+            '\n', parser.writer, '.', self._writer_method,
+            '(', to_unicode(self.render_value()), ')'
+        ])
 
 
 class PlainNode(WriterNode):

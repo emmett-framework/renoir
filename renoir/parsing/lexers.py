@@ -17,6 +17,7 @@ from .stack import Context
 class Lexer:
     evaluate: bool = False
     remove_line: bool = False
+    follows_reindent_on_line_removal: bool = True
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
@@ -38,6 +39,7 @@ class VariableLexer(Lexer):
 
 class BlockLexer(Lexer):
     remove_line = True
+    follows_reindent_on_line_removal = False
 
     def process(self, ctx, value):
         #: create a new stack element with name
@@ -173,6 +175,7 @@ class ExtendLexer(Lexer):
 
 class IgnoreLexer(Lexer):
     remove_line = True
+    follows_reindent_on_line_removal = False
 
     def process(self, ctx, value):
         with ctx('__ignore__'):

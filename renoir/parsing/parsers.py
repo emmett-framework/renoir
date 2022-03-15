@@ -132,7 +132,7 @@ class TemplateParser:
         lexer = self.lexers.get(lex)
         if lexer and not value.startswith('='):
             if lexer.remove_line:
-                element.strip()
+                element.strip(not lexer.follows_reindent_on_line_removal)
             lexer(ctx, value=value)
             return
         #: otherwise add as a python node
@@ -152,7 +152,7 @@ class TemplateParser:
         if parsed == 'end':
             lexer = self.lexers[parsed]
             if lexer.remove_line:
-                element.strip()
+                element.strip(not lexer.follows_reindent_on_line_removal)
             lexer(ctx, value=None)
             return
         #: otherwise add as a plain node
@@ -279,12 +279,10 @@ class HTMLIndentTemplateParser(HTMLTemplateParser, IndentTemplateParser):
             ctx.state.indent = indent
             start_pre, end_pre = self._html_pre_limiters(ctx, line.text)
             self._end_html_pre(ctx, end_pre)
-            line.text = line.text[indent:]
-            line.indent = ctx.state.indent
-            line.ignore_reindent = (
-                ctx.state.in_html_pre if not line.ignore_reindent else
-                line.ignore_reindent
-            )
+            if ctx.state.in_html_pre:
+                line.text = line.text[indent:]
+                line.original_indent = ctx.state.indent
+                line.ignore_reindent = True
             self._start_html_pre(ctx, start_pre)
         ctx._plain(WrappedNode, lines_element)
 

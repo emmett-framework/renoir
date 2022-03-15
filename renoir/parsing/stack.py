@@ -51,11 +51,12 @@ class State:
         self.dependencies = []
         self.indent = 0
         self.offset = 0
-        if self.elements and not self.elements[0] and not self.in_python_block:
-            self.elements.pop(0)
+        if (
+            self.elements and
+            self.elements[0].is_python_block and
+            not self.in_python_block
+        ):
             self.swap_block_type()
-            if len(self.elements) > 1 and not self.elements[-1]:
-                self.elements.pop()
 
     def __call__(
         self,
