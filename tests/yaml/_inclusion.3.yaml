@@ -1,0 +1,3 @@
+inclusion_3:
+  {{ _foo = "foo" }}
+  1st: {{ =_foo }}

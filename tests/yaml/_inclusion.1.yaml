@@ -1,0 +1,2 @@
+{{ _foo = "foo" }}
+inclusion_1: {{ =_foo }}

@@ -102,6 +102,19 @@ inclusion:
       first: foo
       second: bar
     main_key: main_val
+  - inclusion_1: foo
+    main_key: main_val
+  - inclusion_2:
+      1st: foo
+      2nd: bar
+    main_key: main_val
+  - inclusion_3:
+      1st: foo
+    main_key: main_val
+  - inclusion_4:
+      1st: foo
+      2nd: bar
+    main_key: main_val
 added:
   indent:
     foo:

@@ -9,6 +9,14 @@ array:
 inclusion:
   - {{ include '_inclusion.yaml' }}
     main_key: main_val
+  - {{ include '_inclusion.1.yaml' }}
+    main_key: main_val
+  - {{ include '_inclusion.2.yaml' }}
+    main_key: main_val
+  - {{ include '_inclusion.3.yaml' }}
+    main_key: main_val
+  - {{ include '_inclusion.4.yaml' }}
+    main_key: main_val
 added:
   indent:
     {{ =indent(additional, 4) }}

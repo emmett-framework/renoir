@@ -1,0 +1,5 @@
+inclusion_4:
+  {{ _foo = "foo" }}
+  {{ _bar = "bar" }}
+  1st: {{ =_foo }}
+  2nd: {{ =_bar }}
