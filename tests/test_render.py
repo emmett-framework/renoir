@@ -249,6 +249,48 @@ def test_html_indent(templater_html_indent):
         html_indent_rendered[1:]
 
 
+html_indent_rendered2 = """
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test</title>
+
+    </head>
+    <body>
+        <div>header1</div>
+        <div class="page">
+            <a href="/" class="title"><h1>Test</h1></a>
+            <div class="nav">
+                <a href="/">nuvolosit&#224; variabile</a>
+            </div>
+
+            <ul class="posts">
+                <li>
+                    <h2>foo</h2>
+                    <hr />
+                </li>
+                <li>
+                    <h2>bar</h2>
+                    <hr />
+                </li>
+            </ul>
+
+        </div>
+        <div>footer</div>
+    </body>
+</html>"""
+
+
+def test_html_indent2(templater_html_indent):
+    r = templater_html_indent.render(
+        'test2.html', {
+            'posts': [{'title': 'foo'}, {'title': 'bar'}]
+        }
+    )
+    assert "\n".join([l.rstrip() for l in r.splitlines()]) == \
+        html_indent_rendered2[1:]
+
+
 html_pre_rendered = """
 <div>
     <pre>

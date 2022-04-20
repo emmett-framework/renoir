@@ -106,6 +106,10 @@ class Element:
     def __bool__(self) -> bool:
         return bool(self.text)
 
+    @property
+    def can_arbitrate_reindent(self) -> bool:
+        return not bool(str(self))
+
 
 class ElementSplitted:
     __slots__ = ['parent', 'lines']
@@ -153,7 +157,7 @@ class ElementSplitted:
                 if prev.idx != self.parent.ctx.strip_arbiter.idx:
                     prev = prev.prev(2)
                 else:
-                    rv = True
+                    rv = prev.can_arbitrate_reindent
                     break
             else:
                 break
