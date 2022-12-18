@@ -330,17 +330,16 @@ class WriterNode(Node):
         return str(self.value)
 
     def __render__(self, parser):
-        return ''.join([
-            '\n', parser.writer, '.', self._writer_method,
-            '(', to_unicode(self.render_value()), ')'
-        ])
+        v = to_unicode(self.render_value())
+        return f'\n{parser.writer}.{self._writer_method}({v})' if v else ''
 
 
 class PlainNode(WriterNode):
     __slots__ = ['value', 'indent', 'source', 'lines']
 
     def render_value(self):
-        return repr(str(self.value))
+        v = str(self.value)
+        return repr(v) if v else None
 
 
 class WrappedNode(PlainNode):

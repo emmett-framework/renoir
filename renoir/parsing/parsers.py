@@ -32,7 +32,7 @@ class TemplateParser:
 
     #: re-indentation rules
     re_auto_dedent = re.compile(
-        r'^(elif |else:|except:|except |finally:).*$',
+        r'^(elif |else:|case |except:|except |finally:).*$',
         re.DOTALL
     )
     re_dedent = re.compile(
@@ -183,6 +183,7 @@ class TemplateParser:
         new_lines = []
         indent = 0
         dedented = 0
+        match_stack = []
         #: parse lines
         for raw_line in lines:
             line = raw_line.strip()
@@ -191,6 +192,8 @@ class TemplateParser:
             #: apply auto dedenting
             if self.re_auto_dedent.match(line):
                 indent = indent + dedented - 1
+                if line.startswith('case') and match_stack:
+                    match_stack[-1] -= 1
             dedented = 0
             #: apply indentation
             indent = max(indent, 0)
@@ -198,6 +201,10 @@ class TemplateParser:
             #: dedenting on `pass`
             if self.re_pass.match(line):
                 indent -= 1
+                if match_stack:
+                    match_item = match_stack.pop()
+                    if match_item == 0:
+                        indent -= 1
             #: implicit dedent on specific commands
             if self.re_dedent.match(line):
                 dedented = 1
@@ -205,6 +212,11 @@ class TemplateParser:
             #: indenting on lines ending with `:`
             if line.endswith(':') and not line.startswith('#'):
                 indent += 1
+                if line.startswith('match'):
+                    match_stack.append(0)
+                    indent += 1
+                if line.startswith('case') and match_stack:
+                    match_stack[-1] += 1
         #: handle indentation errors
         if indent > 0:
             raise TemplateError(
