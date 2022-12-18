@@ -1,6 +1,15 @@
 Renoir changelog
 ================
 
+Version 1.6
+-----------
+
+*Released on December 18th 2022*
+
+- Added support for structural pattern matching (`match`/`case` statements)
+- Removed Python 3.6 support
+- Added Python 3.11 support
+
 Version 1.5
 -----------
 
