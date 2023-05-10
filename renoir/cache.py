@@ -90,8 +90,8 @@ class ParserCache(HashableCache):
         self.cdata = {}
         self.dependencies = {}
 
-    def _expired_dependency(self, name):
-        path, file_name = self.cache.templater.preload(name)
+    def _expired_dependency(self, name, preload_params):
+        path, file_name = self.cache.templater.preload(name, **preload_params)
         file_path = os.path.join(path, file_name)
         if os.stat(file_path).st_mtime != self.cache.load.mtimes[file_path]:
             return True
@@ -101,8 +101,8 @@ class ParserCache(HashableCache):
         hashed = make_hash(source)
         if self.hashes.get(name) != hashed:
             return None, None
-        for dep_name in self.dependencies[name]:
-            if self._expired_dependency(dep_name):
+        for dep_name, dep_preload_params in self.dependencies[name].values():
+            if self._expired_dependency(dep_name, dep_preload_params):
                 return None, None
         return self.cached_get(name, source)
 

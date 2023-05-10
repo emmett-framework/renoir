@@ -82,13 +82,13 @@ class TemplateParser:
                 'Invalid template filename', ctx.state.source, ctx.state.lines
             )
         #: resolve paths
-        preload_params = {}
+        preload_name, preload_params = filename, {}
         if any(filename.startswith(relpath) for relpath in ["./", "../"]):
             full_path = (ctxpath / Path(filename)).resolve()
             preload_params["path"] = full_path.parent
-            filename = full_path.name
+            preload_name = full_path.name
         #: get the file contents
-        path, file_name = self.templater.preload(filename, **preload_params)
+        path, file_name = self.templater.preload(preload_name, **preload_params)
         file_path = os.path.join(path, file_name)
         try:
             text = self.templater.load(file_path)
@@ -100,7 +100,7 @@ class TemplateParser:
         text = self.templater.prerender(text, file_path)
         if strip_ending_new_line and text.endswith("\n"):
             text = text[:-1]
-        return filename, file_path, text
+        return filename, file_path, (preload_name, preload_params), text
 
     def parse_plain_block(self, ctx, element):
         ctx.update_lines_count(element.linesn)
@@ -176,7 +176,7 @@ class TemplateParser:
         ctx = self._build_ctx(text)
         ctx.parse()
         self.content = ctx.content
-        self.dependencies = list(set(ctx.state.dependencies))
+        self.dependencies = dict(ctx.state.dependencies)
 
     def reindent(self, text):
         lines = text.split('\n')

@@ -48,7 +48,7 @@ class State:
         self.settings = settings
         self.content = Content()
         self.blocks = blocks if blocks is not None else {}
-        self.dependencies = []
+        self.dependencies = {}
         self.indent = 0
         self.offset = 0
         if (
@@ -157,13 +157,13 @@ class Context:
         return self
 
     def load(self, name, **kwargs):
-        name, file_path, text = self.parser._get_file_text(
+        name, file_path, preload_params, text = self.parser._get_file_text(
             self,
             name,
             ctxpath=self.cwd,
             strip_ending_new_line=kwargs.pop("strip_ending_new_line", False)
         )
-        self.state.dependencies.append(name)
+        self.state.dependencies[name] = preload_params
         kwargs['source'] = file_path
         kwargs['in_python_block'] = False
         return self(
@@ -182,7 +182,7 @@ class Context:
         if exc_type:
             raise
         self.swap_block_type()
-        deps = list(self.state.dependencies)
+        deps = dict(self.state.dependencies)
         contents = self.content.contents
         name = self.name
         lines = self.state.lines
@@ -196,7 +196,7 @@ class Context:
             self.update_lines_count(
                 lines.end - lines.start, offset=lines.end)
         self.state.blocks[name] = state_id
-        self.state.dependencies.extend(deps)
+        self.state.dependencies.update(deps)
         self.nodes_map[state_id] = node
 
     def python_node(self, value=None):
