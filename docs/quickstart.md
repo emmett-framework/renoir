@@ -58,7 +58,7 @@ As you can see the two notable differences we get comparing the code to a standa
 Template inheritance
 ---------------------
 
-Renoir provides template inheritance, allowing you to build skeletons and blocks that child templates can override. Let's say we build our skeleton in *layour.html* file:
+Renoir provides template inheritance, allowing you to build skeletons and blocks that child templates can override. Let's say we build our skeleton in *layout.html* file:
 
 ```html
 <!DOCTYPE html>
