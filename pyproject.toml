@@ -1,3 +1,6 @@
+[project]
+name = "renoir"
+
 [tool.poetry]
 name = "renoir"
 version = "1.6.1"
