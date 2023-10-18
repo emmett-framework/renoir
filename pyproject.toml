@@ -3,7 +3,7 @@ name = "renoir"
 
 [tool.poetry]
 name = "renoir"
-version = "1.6.1"
+version = "1.7.0"
 description = "A templating engine designed with simplicity in mind"
 authors = ["Giovanni Barillari <gi0baro@d4net.org>"]
 license = "BSD-3-Clause"
@@ -20,11 +20,11 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Text Processing :: Markup :: HTML"
 ]
@@ -43,11 +43,11 @@ include = [
 "Issue Tracker" = "https://github.com/emmett-framework/renoir/issues"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.2"
-pyyaml = "^5.3.1"
+pytest = "^7.4"
+pyyaml = "^6.0.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
