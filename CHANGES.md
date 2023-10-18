@@ -1,6 +1,14 @@
 Renoir changelog
 ================
 
+Version 1.7
+-----------
+
+*Released on October 18th 2023*
+
+- Removed Python 3.7 support
+- Added Python 3.12 support
+
 Version 1.6
 -----------
 
