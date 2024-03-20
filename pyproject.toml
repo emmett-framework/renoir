@@ -3,7 +3,7 @@ name = "renoir"
 
 [tool.poetry]
 name = "renoir"
-version = "1.7.0"
+version = "1.7.1"
 description = "A templating engine designed with simplicity in mind"
 authors = ["Giovanni Barillari <gi0baro@d4net.org>"]
 license = "BSD-3-Clause"
