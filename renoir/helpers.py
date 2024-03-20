@@ -27,8 +27,8 @@ class TemplateReference:
         self.file_path, self.lineno = self.match_template(writer_lineno)
 
     def match_template(self, writer_lineno):
-        element = self.lines[writer_lineno - 1]
         try:
+            element = self.lines[writer_lineno - 1]
             reference = (element[0], element[1])
         except Exception:
             reference = (self.parser_ctx.name, ('<unknown>', 'unknown'))

@@ -317,7 +317,8 @@ class NodeGroup(Node):
 
     def __reference__(self):
         rv = []
-        for element in self.value:
+        stack = self.value if not self._evicted else []
+        for element in stack:
             rv.extend(element.__reference__())
         return rv
 
@@ -332,6 +333,11 @@ class WriterNode(Node):
     def __render__(self, parser):
         v = to_unicode(self.render_value())
         return f'\n{parser.writer}.{self._writer_method}({v})' if v else ''
+
+    def __reference__(self):
+        if not to_unicode(self.render_value()):
+            return []
+        return super().__reference__()
 
 
 class PlainNode(WriterNode):
