@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/renor
+      url: https://pypi.org/p/renoir
     permissions:
       id-token: write
 

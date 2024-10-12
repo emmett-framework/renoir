@@ -1,6 +1,13 @@
 name: Tests
 
-on: [push, pull_request]
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - master
+  push:
+    branches:
+      - master
 
 jobs:
   Linux:

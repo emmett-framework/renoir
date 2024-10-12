@@ -34,7 +34,7 @@ classifiers = [
 
 [project.urls]
 Homepage = 'https://github.com/emmett-framework/renoir'
-Documentation = 'https://github.com/emmett-framework/renoir/docs'
+Documentation = 'https://github.com/emmett-framework/renoir/tree/master/docs'
 Funding = 'https://github.com/sponsors/gi0baro'
 Source = 'https://github.com/emmett-framework/renoir'
 Issues = 'https://github.com/emmett-framework/renoir/issues'
