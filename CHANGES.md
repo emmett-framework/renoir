@@ -1,6 +1,13 @@
 Renoir changelog
 ================
 
+Version 1.8
+-----------
+
+*Released on October 12th 2024*
+
+- Added Python 3.13 support
+
 Version 1.7
 -----------
 
