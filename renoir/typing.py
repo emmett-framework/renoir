@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-    renoir.typing
-    -------------
+renoir.typing
+-------------
 
-    Provides typing helpers.
+Provides typing helpers.
 
-    :copyright: 2014 Giovanni Barillari
-    :license: BSD-3-Clause
+:copyright: 2014 Giovanni Barillari
+:license: BSD-3-Clause
 """
-
 
 from typing import Any, Callable, Dict, Tuple
 

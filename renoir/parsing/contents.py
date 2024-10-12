@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-    renoir.parsing.contents
-    -----------------------
+renoir.parsing.contents
+-----------------------
 
-    Provides structures for templating system.
+Provides structures for templating system.
 
-    :copyright: 2014 Giovanni Barillari
-    :license: BSD-3-Clause
+:copyright: 2014 Giovanni Barillari
+:license: BSD-3-Clause
 """
+
+from __future__ import annotations
 
 from collections.abc import Sequence
 from typing import List, Optional
@@ -18,25 +20,25 @@ from ..helpers import adict
 
 class Element:
     __slots__ = [
-        'ctx', 'idx', 'text', 'is_python_block',
-        'linesn', 'linesd',
-        'strippable_head', 'strippable_tail',
-        'stripped_head', 'stripped_tail',
-        'reindent_skip'
+        "ctx",
+        "idx",
+        "text",
+        "is_python_block",
+        "linesn",
+        "linesd",
+        "strippable_head",
+        "strippable_tail",
+        "stripped_head",
+        "stripped_tail",
+        "reindent_skip",
     ]
 
-    def __init__(
-        self,
-        ctx: 'Elements',
-        idx: int,
-        text: str,
-        is_python_block: bool = False
-    ):
+    def __init__(self, ctx: "Elements", idx: int, text: str, is_python_block: bool = False):
         self.ctx = ctx
         self.idx = idx
         self.text = text
         self.is_python_block = is_python_block
-        self.linesn = text.count('\n')
+        self.linesn = text.count("\n")
         self.linesd = self.linesn + 1
         self.strippable_head = False
         self.strippable_tail = False
@@ -47,14 +49,14 @@ class Element:
             self.strippable_head = False
             self.strippable_tail = False
         else:
-            lsplit = text.split('\n', 1)
-            rsplit = text.rsplit('\n', 1)
-            if not lsplit[0].strip(' '):
+            lsplit = text.split("\n", 1)
+            rsplit = text.rsplit("\n", 1)
+            if not lsplit[0].strip(" "):
                 self.strippable_head = True
-            if not rsplit[-1].strip(' '):
+            if not rsplit[-1].strip(" "):
                 self.strippable_tail = True
 
-    def prev(self, positions: int = 1) -> Optional['Element']:
+    def prev(self, positions: int = 1) -> Optional["Element"]:
         idx = self.idx - positions
         if idx < 0:
             return None
@@ -63,7 +65,7 @@ class Element:
         except IndexError:
             return None
 
-    def next(self, positions: int = 1) -> Optional['Element']:
+    def next(self, positions: int = 1) -> Optional["Element"]:
         try:
             return self.ctx[self.idx + positions]
         except IndexError:
@@ -92,15 +94,15 @@ class Element:
             return
         self.stripped_tail = True
 
-    def split(self) -> 'ElementSplitted':
+    def split(self) -> ElementSplitted:
         return ElementSplitted(self)
 
     def __str__(self) -> str:
         rv = self.text
         if self.stripped_tail:
-            rv = rv.rsplit('\n', 1)[0] + '\n'
+            rv = rv.rsplit("\n", 1)[0] + "\n"
         if self.stripped_head:
-            rv = rv.split('\n', 1)[-1]
+            rv = rv.split("\n", 1)[-1]
         return rv
 
     def __bool__(self) -> bool:
@@ -112,19 +114,13 @@ class Element:
 
 
 class ElementSplitted:
-    __slots__ = ['parent', 'lines']
+    __slots__ = ["parent", "lines"]
 
     def __init__(self, parent: Element):
         self.parent = parent
         self.lines = [
-            adict(
-                text=line,
-                indent=0,
-                original_indent=0,
-                ignore_reindent=False,
-                offset=idx
-            )
-            for idx, line in enumerate(self.parent.text.split('\n'))
+            adict(text=line, indent=0, original_indent=0, ignore_reindent=False, offset=idx)
+            for idx, line in enumerate(self.parent.text.split("\n"))
         ]
 
     @property
@@ -146,10 +142,7 @@ class ElementSplitted:
     def _has_reindent_arbiter(self):
         if self.parent.reindent_skip:
             return False
-        if (
-            self.parent.stripped_head and
-            self.parent.idx == self.parent.ctx.strip_arbiter.idx
-        ):
+        if self.parent.stripped_head and self.parent.idx == self.parent.ctx.strip_arbiter.idx:
             return True
         rv, prev = False, self.parent.prev(2)
         while prev is not None:
@@ -165,22 +158,15 @@ class ElementSplitted:
 
     def __str__(self) -> str:
         lines = []
-        offsets = (
-            1 if self.parent.stripped_head else None,
-            -1 if self.parent.stripped_tail else None
-        )
+        offsets = (1 if self.parent.stripped_head else None, -1 if self.parent.stripped_tail else None)
         if not self.parent.strippable_head and self.lines:
             self.lines[0].ignore_reindent = True
         if self.parent.stripped_head and self._has_reindent_arbiter():
             self.lines[offsets[0] or 0].ignore_reindent = True
-        for line in self.lines[offsets[0]:offsets[1]]:
+        for line in self.lines[offsets[0] : offsets[1]]:
             lines.append(
                 "{pre}{text}".format(
-                    pre=(
-                        " " * line.original_indent if line.ignore_reindent else
-                        " " * line.indent
-                    ),
-                    text=line.text
+                    pre=(" " * line.original_indent if line.ignore_reindent else " " * line.indent), text=line.text
                 )
             )
         if self.parent.stripped_tail:
@@ -192,7 +178,7 @@ class ElementSplitted:
 
 
 class Elements(Sequence):
-    __slots__ = ['data']
+    __slots__ = ["data"]
 
     def __init__(self, elements: List[str]):
         self.data = []
@@ -204,7 +190,7 @@ class Elements(Sequence):
                 in_python_block = True
             if not elements[-1]:
                 offsets[1] = -1
-        for idx, element in enumerate(elements[offsets[0]:offsets[1]]):
+        for idx, element in enumerate(elements[offsets[0] : offsets[1]]):
             self.data.append(Element(self, idx, element, in_python_block))
             in_python_block = not in_python_block
 
@@ -228,7 +214,7 @@ class Elements(Sequence):
 
 
 class Content:
-    __slots__ = ['_contents', '_evicted']
+    __slots__ = ["_contents", "_evicted"]
 
     def __init__(self):
         self._contents = []
@@ -249,9 +235,7 @@ class Content:
         return [] if self._evicted else list(self._contents)
 
     def render(self, parser):
-        return '' if self._evicted else ''.join(
-            element.__render__(parser) for element in self._contents
-        )
+        return "" if self._evicted else "".join(element.__render__(parser) for element in self._contents)
 
     def reference(self):
         rv = []
@@ -261,11 +245,9 @@ class Content:
 
 
 class Node:
-    __slots__ = ['value', 'indent', 'source', 'lines']
+    __slots__ = ["value", "indent", "source", "lines"]
 
-    def __init__(
-        self, value=None, indent=0, source=None, lines=None
-    ):
+    def __init__(self, value=None, indent=0, source=None, lines=None):
         self.value = value
         self.indent = indent
         self.source = source
@@ -278,17 +260,17 @@ class Node:
         self.indent = indent
 
     def __render__(self, parser):
-        return '\n' + to_unicode(self.value)
+        return "\n" + to_unicode(self.value)
 
     def __reference__(self):
         return [(self.source, self.lines)]
 
     def _rendered_lines(self):
-        return self.__render__(adict(writer='w')).split('\n')[1:]
+        return self.__render__(adict(writer="w")).split("\n")[1:]
 
 
 class NodeGroup(Node):
-    __slots__ = ['value', 'indent', 'source', 'lines', '_evicted']
+    __slots__ = ["value", "indent", "source", "lines", "_evicted"]
 
     def __init__(self, value=None, **kwargs):
         super().__init__(value or [], **kwargs)
@@ -311,9 +293,7 @@ class NodeGroup(Node):
         self._evicted = True
 
     def __render__(self, parser):
-        return '' if self._evicted else ''.join(
-            element.__render__(parser) for element in self.value
-        )
+        return "" if self._evicted else "".join(element.__render__(parser) for element in self.value)
 
     def __reference__(self):
         rv = []
@@ -324,15 +304,15 @@ class NodeGroup(Node):
 
 
 class WriterNode(Node):
-    __slots__ = ['value', 'indent', 'source', 'lines']
-    _writer_method = 'write'
+    __slots__ = ["value", "indent", "source", "lines"]
+    _writer_method = "write"
 
     def render_value(self):
         return str(self.value)
 
     def __render__(self, parser):
         v = to_unicode(self.render_value())
-        return f'\n{parser.writer}.{self._writer_method}({v})' if v else ''
+        return f"\n{parser.writer}.{self._writer_method}({v})" if v else ""
 
     def __reference__(self):
         if not to_unicode(self.render_value()):
@@ -341,7 +321,7 @@ class WriterNode(Node):
 
 
 class PlainNode(WriterNode):
-    __slots__ = ['value', 'indent', 'source', 'lines']
+    __slots__ = ["value", "indent", "source", "lines"]
 
     def render_value(self):
         v = str(self.value)
@@ -349,7 +329,7 @@ class PlainNode(WriterNode):
 
 
 class WrappedNode(PlainNode):
-    __slots__ = ['value', 'indent', 'source', 'lines']
+    __slots__ = ["value", "indent", "source", "lines"]
 
     def increment_indent(self, increment):
         self.value.increment_indent(increment)
@@ -362,5 +342,5 @@ class WrappedNode(PlainNode):
 
 
 class HTMLEscapeNode(WriterNode):
-    __slots__ = ['value', 'indent', 'source', 'lines']
-    _writer_method = 'escape'
+    __slots__ = ["value", "indent", "source", "lines"]
+    _writer_method = "escape"

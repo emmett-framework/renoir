@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-    renoir.helpers
-    --------------
+renoir.helpers
+--------------
 
-    Provides helpers.
+Provides helpers.
 
-    :copyright: 2014 Giovanni Barillari
-    :license: BSD-3-Clause
+:copyright: 2014 Giovanni Barillari
+:license: BSD-3-Clause
 """
 
 import traceback
@@ -18,7 +18,7 @@ class TemplateReference:
         self.exc_type = exc_type
         self.exc_value = exc_value
         self.tb = tb
-        if hasattr(exc_value, 'lineno'):
+        if hasattr(exc_value, "lineno"):
             writer_lineno = exc_value.lineno
         else:
             template_frame = traceback.extract_tb(tb, 2)[-1]
@@ -31,12 +31,12 @@ class TemplateReference:
             element = self.lines[writer_lineno - 1]
             reference = (element[0], element[1])
         except Exception:
-            reference = (self.parser_ctx.name, ('<unknown>', 'unknown'))
+            reference = (self.parser_ctx.name, ("<unknown>", "unknown"))
         return reference[0], reference[1][0]
 
 
 class ParserCtx:
-    __slots__ = ('name', 'content')
+    __slots__ = ("name", "content")
 
     def __init__(self, name, content):
         self.name = name

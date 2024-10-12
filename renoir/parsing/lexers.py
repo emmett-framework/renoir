@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-    renoir.parsing.lexers
-    ---------------------
+renoir.parsing.lexers
+---------------------
 
-    Provides lexers for templates parsing.
+Provides lexers for templates parsing.
 
-    :copyright: 2014 Giovanni Barillari
-    :license: BSD-3-Clause
+:copyright: 2014 Giovanni Barillari
+:license: BSD-3-Clause
 """
 
 from typing import Optional
@@ -87,19 +87,15 @@ class IncludeLexer(Lexer):
                 source=extend_src.source,
                 line_start=extend_src.lines.end,
                 blocks=extend_src.blocks,
-                extend_src_id=extend_src._id
+                extend_src_id=extend_src._id,
             ):
                 ctx.parse()
                 ctx.state.blocks_map[extend_src._id].update(ctx.state.blocks)
-                extend_src.update_lines_count(
-                    ctx.state.lines.end - ctx.state.lines.start
-                )
+                extend_src.update_lines_count(ctx.state.lines.end - ctx.state.lines.start)
                 included_id = ctx.state._id
             ctx.state.implicit_extenders.pop(extend_src._id)
             ctx.state.includes_parsed[extend_src._id] = ctx.nodes_map[included_id]
-        ctx.nodes_map[included_id].increment_children_indent(
-            ctx.state.indent + ctx.state.offset
-        )
+        ctx.nodes_map[included_id].increment_children_indent(ctx.state.indent + ctx.state.offset)
 
 
 class ExtendLexer(Lexer):
@@ -113,7 +109,7 @@ class ExtendLexer(Lexer):
             extend_map=ctx.state.extend_map or {},
             implicit_extenders=ctx.state.implicit_extenders or {},
             includes_parsed=ctx.state.includes_parsed or {},
-            injections=ctx.state.injections or {}
+            injections=ctx.state.injections or {},
         ):
             ctx.state.blocks_map[ctx.state.parent._id] = {}
             ctx.state.extend_map[ctx.state.source] = ctx.state.parent
@@ -122,12 +118,8 @@ class ExtendLexer(Lexer):
             ctx.parse()
             if ctx.state.implicit_extenders.pop(ctx.state.parent._id, None):
                 self._parse_implicit_extender(ctx)
-            self.inject_content_in_children(
-                ctx, ctx.state.injections[ctx.state.parent._id]
-            )
-            self.replace_extended_blocks(
-                ctx, ctx.state.blocks_map[ctx.state.parent._id]
-            )
+            self.inject_content_in_children(ctx, ctx.state.injections[ctx.state.parent._id])
+            self.replace_extended_blocks(ctx, ctx.state.blocks_map[ctx.state.parent._id])
             ctx.state.injections.pop(ctx.state.parent._id)
 
     def _parse_implicit_extender(self, ctx):
@@ -140,14 +132,12 @@ class ExtendLexer(Lexer):
             source=extend_src.source,
             line_start=extend_src.lines.end,
             blocks=extend_src.blocks,
-            extend_src_id=extend_src._id
+            extend_src_id=extend_src._id,
         ):
             ctx.parse()
             ctx.state.blocks_map[extend_src._id].update(ctx.state.blocks)
             ctx.content.evict()
-            extend_src.update_lines_count(
-                ctx.state.lines.end - ctx.state.lines.start
-            )
+            extend_src.update_lines_count(ctx.state.lines.end - ctx.state.lines.start)
 
     def inject_content_in_children(self, ctx, injections):
         for key, node in injections.items():
@@ -178,16 +168,16 @@ class IgnoreLexer(Lexer):
     follows_reindent_on_line_removal = False
 
     def process(self, ctx, value):
-        with ctx('__ignore__'):
+        with ctx("__ignore__"):
             ctx.ignore()
 
 
 default_lexers = {
-    '=': VariableLexer(),
-    'block': BlockLexer(),
-    'end': EndLexer(),
-    'super': SuperLexer(),
-    'include': IncludeLexer(),
-    'extend': ExtendLexer(),
-    'raw': IgnoreLexer()
+    "=": VariableLexer(),
+    "block": BlockLexer(),
+    "end": EndLexer(),
+    "super": SuperLexer(),
+    "include": IncludeLexer(),
+    "extend": ExtendLexer(),
+    "raw": IgnoreLexer(),
 }

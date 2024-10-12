@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-    renoir.writers
-    --------------
+renoir.writers
+--------------
 
-    Provides the writers for the templating system.
+Provides the writers for the templating system.
 
-    :copyright: 2014 Giovanni Barillari
-    :license: BSD-3-Clause
+:copyright: 2014 Giovanni Barillari
+:license: BSD-3-Clause
 """
 
 from io import StringIO
 
-from ._shortcuts import to_bytes, to_unicode, htmlescape
+from ._shortcuts import htmlescape, to_bytes, to_unicode
 
 
 class Writer:
@@ -33,7 +33,7 @@ class Writer:
 
     def _escape_data(self, data):
         body = None
-        if hasattr(data, '__html__'):
+        if hasattr(data, "__html__"):
             try:
                 body = data.__html__()
             except Exception:
@@ -49,8 +49,7 @@ class Writer:
 class EscapeAll:
     @staticmethod
     def _to_html(data):
-        return to_bytes(
-            Writer._to_html(data), 'ascii', 'xmlcharrefreplace')
+        return to_bytes(Writer._to_html(data), "ascii", "xmlcharrefreplace")
 
 
 class EscapeAllWriter(EscapeAll, Writer):

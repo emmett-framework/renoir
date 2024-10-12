@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
 """
-    renoir.debug
-    ------------
+renoir.debug
+------------
 
-    Provides debugging utilities.
+Provides debugging utilities.
 
-    :copyright: 2014 Giovanni Barillari
+:copyright: 2014 Giovanni Barillari
 
-    Quite a lot of magic comes from Flask (http://flask.pocoo.org)
-    :copyright: (c) 2014 by Armin Ronacher.
+Quite a lot of magic comes from Flask (http://flask.pocoo.org)
+:copyright: (c) 2014 by Armin Ronacher.
 
-    :license: BSD-3-Clause
+:license: BSD-3-Clause
 """
 
 import sys
 import traceback
-
-from types import TracebackType, CodeType
+from types import CodeType, TracebackType
 
 from ._internal import reraise
 from .errors import TemplateError, TemplateSyntaxError
@@ -33,9 +32,9 @@ except ImportError:
 try:
     exec("raise TypeError, 'foo'")
 except SyntaxError:
-    raise_helper = 'raise __renoir_exception__[1]'
+    raise_helper = "raise __renoir_exception__[1]"
 except TypeError:
-    raise_helper = 'raise __renoir_exception__[0], __renoir_exception__[1]'
+    raise_helper = "raise __renoir_exception__[0], __renoir_exception__[1]"
 
 
 class TracebackFrameProxy:
@@ -68,7 +67,7 @@ class ProcessedTraceback:
     """Holds a renoir preprocessed traceback for printing or reraising."""
 
     def __init__(self, exc_type, exc_value, frames):
-        assert frames, 'no frames for this traceback?'
+        assert frames, "no frames for this traceback?"
         self.exc_type = exc_type
         self.exc_value = exc_value
         self.frames = frames
@@ -83,9 +82,8 @@ class ProcessedTraceback:
 
     def render_as_text(self, limit=None):
         """Return a string with the traceback."""
-        lines = traceback.format_exception(
-            self.exc_type, self.exc_value, self.frames[0], limit=limit)
-        return ''.join(lines).rstrip()
+        lines = traceback.format_exception(self.exc_type, self.exc_value, self.frames[0], limit=limit)
+        return "".join(lines).rstrip()
 
     @property
     def exc_info(self):
@@ -121,7 +119,7 @@ def translate_syntax_error(error):
     exc_info = (error.__class__, error, None)
     filename = error.file_path
     if filename is None:
-        filename = '<unknown>'
+        filename = "<unknown>"
     return fake_exc_info(exc_info, filename, error.lineno)
 
 
@@ -129,7 +127,7 @@ def translate_template_error(error):
     exc_info = (error.__class__, error, None)
     filename = error.file_path
     if filename is None:
-        filename = '<unknown>'
+        filename = "<unknown>"
     return fake_exc_info(exc_info, filename, error.lineno)
 
 
@@ -139,12 +137,13 @@ def make_frame_proxy(frame):
         return proxy
 
     def operation_handler(operation, *args, **kwargs):
-        if operation in ('__getattribute__', '__getattr__'):
+        if operation in ("__getattribute__", "__getattr__"):
             return getattr(proxy, args[0])
-        elif operation == '__setattr__':
+        elif operation == "__setattr__":
             proxy.__setattr__(*args, **kwargs)
         else:
             return getattr(proxy, operation)(*args, **kwargs)
+
     return tproxy(TracebackType, operation_handler)
 
 
@@ -155,11 +154,10 @@ def translate_exception(exc_info, initial_skip=0):
     tb = exc_info[2]
     frames = []
 
-    is_template_error = isinstance(
-        exc_info[1], (TemplateError, TemplateSyntaxError))
+    is_template_error = isinstance(exc_info[1], (TemplateError, TemplateSyntaxError))
 
     # skip some internal frames if wanted
-    for x in range(initial_skip):
+    for _ in range(initial_skip):
         if tb is not None:
             tb = tb.tb_next
 
@@ -169,17 +167,13 @@ def translate_exception(exc_info, initial_skip=0):
         next = tb.tb_next
 
         # fake template exceptions
-        template = tb.tb_frame.f_globals.get('__renoir_template__')
+        template = tb.tb_frame.f_globals.get("__renoir_template__")
         if template is not None:
             lineno = template.lineno
-            tb = fake_exc_info(
-                exc_info[:2] + (tb,), template.file_path, lineno)[2]
+            tb = fake_exc_info(exc_info[:2] + (tb,), template.file_path, lineno)[2]
 
         frames.append(make_frame_proxy(tb))
-        if (
-            is_template_error and
-            '__renoir_template__' in tb.tb_frame.f_globals
-        ):
+        if is_template_error and "__renoir_template__" in tb.tb_frame.f_globals:
             break
         tb = next
 
@@ -199,48 +193,70 @@ def fake_exc_info(exc_info, filename, lineno):
     # figure the real context out
     if tb is not None:
         real_locals = tb.tb_frame.f_locals.copy()
-        ctx = real_locals.get('context')
+        ctx = real_locals.get("context")
         if ctx:
             locals = ctx
         else:
             locals = {}
-        #for name, value in real_locals.items():
+        # for name, value in real_locals.items():
         #    if name.startswith('l_') and value is not missing:
         #        locals[name[2:]] = value
 
         # if there is a local called __renoir_exception__, we get
         # rid of it to not break the debug functionality.
-        locals.pop('__renoir_exception__', None)
+        locals.pop("__renoir_exception__", None)
     else:
         locals = {}
 
     # assamble fake globals we need
     globals = {
-        '__name__': filename,
-        '__file__': filename,
-        '__renoir_exception__': exc_info[:2],
-
+        "__name__": filename,
+        "__file__": filename,
+        "__renoir_exception__": exc_info[:2],
         # we don't want to keep the reference to the template around
         # to not cause circular dependencies, but we mark it as renoir
         # frame for the ProcessedTraceback
-        '__renoir_template__': None
+        "__renoir_template__": None,
     }
 
     # and fake the exception
-    code = compile('\n' * (lineno - 1) + raise_helper, filename, 'exec')
-    if hasattr(code, 'replace'):
-        code = code.replace(co_filename=filename, co_name='template')
-    elif hasattr(code, 'co_kwonlyargcount'):
+    code = compile("\n" * (lineno - 1) + raise_helper, filename, "exec")
+    if hasattr(code, "replace"):
+        code = code.replace(co_filename=filename, co_name="template")
+    elif hasattr(code, "co_kwonlyargcount"):
         code = CodeType(
-            0, 0, code.co_nlocals, code.co_stacksize, code.co_flags,
-            code.co_code, code.co_consts, code.co_names, code.co_varnames,
-            filename, 'template', code.co_firstlineno, code.co_lnotab, (), ()
+            0,
+            0,
+            code.co_nlocals,
+            code.co_stacksize,
+            code.co_flags,
+            code.co_code,
+            code.co_consts,
+            code.co_names,
+            code.co_varnames,
+            filename,
+            "template",
+            code.co_firstlineno,
+            code.co_lnotab,
+            (),
+            (),
         )
     else:
         code = CodeType(
-            0, code.co_nlocals, code.co_stacksize, code.co_flags,
-            code.co_code, code.co_consts, code.co_names, code.co_varnames,
-            filename, 'template', code.co_firstlineno, code.co_lnotab, (), ()
+            0,
+            code.co_nlocals,
+            code.co_stacksize,
+            code.co_flags,
+            code.co_code,
+            code.co_consts,
+            code.co_names,
+            code.co_varnames,
+            filename,
+            "template",
+            code.co_firstlineno,
+            code.co_lnotab,
+            (),
+            (),
         )
 
     # execute the code and catch the new traceback
@@ -263,7 +279,7 @@ def _init_ugly_crap():
     import ctypes
 
     # figure out side of _Py_ssize_t
-    if hasattr(ctypes.pythonapi, 'Py_InitModule4_64'):
+    if hasattr(ctypes.pythonapi, "Py_InitModule4_64"):
         _Py_ssize_t = ctypes.c_int64
     else:
         _Py_ssize_t = ctypes.c_int
@@ -271,36 +287,36 @@ def _init_ugly_crap():
     # regular python
     class _PyObject(ctypes.Structure):
         pass
-    _PyObject._fields_ = [
-        ('ob_refcnt', _Py_ssize_t),
-        ('ob_type', ctypes.POINTER(_PyObject))
-    ]
+
+    _PyObject._fields_ = [("ob_refcnt", _Py_ssize_t), ("ob_type", ctypes.POINTER(_PyObject))]
 
     # python with trace
-    if hasattr(sys, 'getobjects'):
+    if hasattr(sys, "getobjects"):
+
         class _PyObject(ctypes.Structure):
             pass
+
         _PyObject._fields_ = [
-            ('_ob_next', ctypes.POINTER(_PyObject)),
-            ('_ob_prev', ctypes.POINTER(_PyObject)),
-            ('ob_refcnt', _Py_ssize_t),
-            ('ob_type', ctypes.POINTER(_PyObject))
+            ("_ob_next", ctypes.POINTER(_PyObject)),
+            ("_ob_prev", ctypes.POINTER(_PyObject)),
+            ("ob_refcnt", _Py_ssize_t),
+            ("ob_type", ctypes.POINTER(_PyObject)),
         ]
 
     class _Traceback(_PyObject):
         pass
+
     _Traceback._fields_ = [
-        ('tb_next', ctypes.POINTER(_Traceback)),
-        ('tb_frame', ctypes.POINTER(_PyObject)),
-        ('tb_lasti', ctypes.c_int),
-        ('tb_lineno', ctypes.c_int)
+        ("tb_next", ctypes.POINTER(_Traceback)),
+        ("tb_frame", ctypes.POINTER(_PyObject)),
+        ("tb_lasti", ctypes.c_int),
+        ("tb_lineno", ctypes.c_int),
     ]
 
     def tb_set_next(tb, next):
         """Set the tb_next attribute of a traceback object."""
-        if not (isinstance(tb, TracebackType) and
-                (next is None or isinstance(next, TracebackType))):
-            raise TypeError('tb_set_next arguments must be traceback objects')
+        if not (isinstance(tb, TracebackType) and (next is None or isinstance(next, TracebackType))):
+            raise TypeError("tb_set_next arguments must be traceback objects")
         obj = _Traceback.from_address(id(tb))
         if tb.tb_next is not None:
             old = _Traceback.from_address(id(tb.tb_next))

@@ -5,6 +5,10 @@ __pycache__
 .venv
 .vscode
 
+.pytest_cache
+.ruff_cache
+
 build/*
 dist/*
 Renoir.egg-info/*
+uv.lock

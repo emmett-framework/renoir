@@ -1,42 +1,43 @@
 # -*- coding: utf-8 -*-
 """
-    renoir.parsing.stack
-    --------------------
+renoir.parsing.stack
+--------------------
 
-    Provides stack helpers for templates parsing.
+Provides stack helpers for templates parsing.
 
-    :copyright: 2014 Giovanni Barillari
-    :license: BSD-3-Clause
+:copyright: 2014 Giovanni Barillari
+:license: BSD-3-Clause
 """
 
 import uuid
-
 from collections import namedtuple
 from pathlib import Path
 
 from .contents import Content, Elements, Node, NodeGroup
 
 
-ParsedLines = namedtuple('ParsedLines', ('start', 'end'))
+ParsedLines = namedtuple("ParsedLines", ("start", "end"))
 
 
 class State:
     __slots__ = [
-        '_id', 'name', 'source', 'lines',
-        'elements', 'content', 'blocks', 'in_python_block',
-        'parent', 'dependencies', 'indent', 'offset', 'settings'
+        "_id",
+        "name",
+        "source",
+        "lines",
+        "elements",
+        "content",
+        "blocks",
+        "in_python_block",
+        "parent",
+        "dependencies",
+        "indent",
+        "offset",
+        "settings",
     ]
 
     def __init__(
-        self,
-        name,
-        elements,
-        in_python_block=False,
-        parent=None,
-        source=None,
-        line_start=1,
-        blocks=None,
-        **settings
+        self, name, elements, in_python_block=False, parent=None, source=None, line_start=1, blocks=None, **settings
     ):
         self._id = uuid.uuid4().hex
         self.name = name
@@ -51,22 +52,11 @@ class State:
         self.dependencies = {}
         self.indent = 0
         self.offset = 0
-        if (
-            self.elements and
-            self.elements[0].is_python_block and
-            not self.in_python_block
-        ):
+        if self.elements and self.elements[0].is_python_block and not self.in_python_block:
             self.swap_block_type()
 
     def __call__(
-        self,
-        name=None,
-        elements=None,
-        in_python_block=None,
-        parent=None,
-        source=None,
-        line_start=None,
-        **kwargs
+        self, name=None, elements=None, in_python_block=None, parent=None, source=None, line_start=None, **kwargs
     ):
         name = name or self.name
         elements = self.elements if elements is None else elements
@@ -77,10 +67,10 @@ class State:
             self.swap_block_type()
             in_python_block = parent.in_python_block
             line_start = parent.lines.end if line_start is None else line_start
-            settings['isolated_pyblockstate'] = False
+            settings["isolated_pyblockstate"] = False
         else:
             line_start = 1 if line_start is None else line_start
-            settings['isolated_pyblockstate'] = True
+            settings["isolated_pyblockstate"] = True
         if kwargs:
             settings.update(kwargs)
         return self.__class__(
@@ -90,7 +80,7 @@ class State:
             parent=parent,
             source=source,
             line_start=line_start,
-            **settings
+            **settings,
         )
 
     def swap_block_type(self):
@@ -98,19 +88,14 @@ class State:
 
     def update_lines_count(self, additional_lines, offset=None):
         start = self.lines.end if offset is None else offset
-        self.lines = self.lines._replace(
-            start=start, end=start + additional_lines
-        )
+        self.lines = self.lines._replace(start=start, end=start + additional_lines)
 
     def __getattr__(self, name):
         return self.settings.get(name)
 
 
 class Context:
-    def __init__(
-        self, parser, name, text, scope,
-        writer_node_cls, plain_node_cls
-    ):
+    def __init__(self, parser, name, text, scope, writer_node_cls, plain_node_cls):
         self.parser = parser
         self.stack = []
         self.scope = scope
@@ -119,7 +104,7 @@ class Context:
             Elements(self.parser._tag_split_text(text)).to_list(),
             source=name,
             isolated_pyblockstate=True,
-            new_line=False
+            new_line=False,
         )
         self.nodes_map = {}
         self._writer_node_cls = writer_node_cls
@@ -147,30 +132,19 @@ class Context:
     def update_lines_count(self, *args, **kwargs):
         return self.state.update_lines_count(*args, **kwargs)
 
-    def __call__(
-        self, name=None, elements=None, in_python_block=None, **kwargs
-    ):
+    def __call__(self, name=None, elements=None, in_python_block=None, **kwargs):
         self.stack.append(self.state)
-        self.state = self.state(
-            name=name, elements=elements, in_python_block=in_python_block,
-            **kwargs)
+        self.state = self.state(name=name, elements=elements, in_python_block=in_python_block, **kwargs)
         return self
 
     def load(self, name, **kwargs):
         name, file_path, preload_params, text = self.parser._get_file_text(
-            self,
-            name,
-            ctxpath=self.cwd,
-            strip_ending_new_line=kwargs.pop("strip_ending_new_line", False)
+            self, name, ctxpath=self.cwd, strip_ending_new_line=kwargs.pop("strip_ending_new_line", False)
         )
         self.state.dependencies[name] = preload_params
-        kwargs['source'] = file_path
-        kwargs['in_python_block'] = False
-        return self(
-            name=name,
-            elements=Elements(self.parser._tag_split_text(text)).to_list(),
-            **kwargs
-        )
+        kwargs["source"] = file_path
+        kwargs["in_python_block"] = False
+        return self(name=name, elements=Elements(self.parser._tag_split_text(text)).to_list(), **kwargs)
 
     def end_current_step(self):
         self.state.elements = []
@@ -193,8 +167,7 @@ class Context:
         node = self.node_group(contents)
         if not isolated_pyblockstate:
             self.state.in_python_block = in_python_block
-            self.update_lines_count(
-                lines.end - lines.start, offset=lines.end)
+            self.update_lines_count(lines.end - lines.start, offset=lines.end)
         self.state.blocks[name] = state_id
         self.state.dependencies.update(deps)
         self.nodes_map[state_id] = node
@@ -205,12 +178,7 @@ class Context:
         return node
 
     def variable(self, value=None):
-        node = self._writer_node_cls(
-            value,
-            indent=self.state.indent,
-            source=self.state.source,
-            lines=self.state.lines
-        )
+        node = self._writer_node_cls(value, indent=self.state.indent, source=self.state.source, lines=self.state.lines)
         self.content.append(node)
         return node
 
@@ -221,13 +189,7 @@ class Context:
 
     def _plain(self, node_cls, value, **kwargs):
         self.content.append(
-            node_cls(
-                value,
-                indent=self.state.indent,
-                source=self.state.source,
-                lines=self.state.lines,
-                **kwargs
-            )
+            node_cls(value, indent=self.state.indent, source=self.state.source, lines=self.state.lines, **kwargs)
         )
 
     def plain(self, value):
@@ -253,24 +215,13 @@ class Context:
 
 
 class HTMLContext(Context):
-    def __init__(
-        self, parser, name, text, scope,
-        writer_node_cls, plain_node_cls, escape_node_cls
-    ):
-        super().__init__(
-            parser, name, text, scope,
-            writer_node_cls, plain_node_cls
-        )
+    def __init__(self, parser, name, text, scope, writer_node_cls, plain_node_cls, escape_node_cls):
+        super().__init__(parser, name, text, scope, writer_node_cls, plain_node_cls)
         self._escape_node_cls = escape_node_cls
 
     def variable(self, value=None, escape=True):
         node_cls = self._escape_node_cls if escape else self._writer_node_cls
-        node = node_cls(
-            value,
-            indent=self.state.indent,
-            source=self.state.source,
-            lines=self.state.lines
-        )
+        node = node_cls(value, indent=self.state.indent, source=self.state.source, lines=self.state.lines)
         self.content.append(node)
         return node
 

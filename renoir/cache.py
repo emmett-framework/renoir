@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-    renoir.cache
-    ------------
+renoir.cache
+------------
 
-    Provides caching utils.
+Provides caching utils.
 
-    :copyright: 2014 Giovanni Barillari
-    :license: BSD-3-Clause
+:copyright: 2014 Giovanni Barillari
+:license: BSD-3-Clause
 """
 
 import os

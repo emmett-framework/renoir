@@ -1,53 +1,47 @@
 # -*- coding: utf-8 -*-
 """
-    tests.templater
-    ---------------
+tests.templater
+---------------
 
-    Tests templater module.
+Tests templater module.
 """
 
 import os
-import pytest
 import traceback
+
+import pytest
 import yaml
 
 from renoir import Renoir
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def templater():
-    return Renoir(
-        mode='plain', debug=True, path=os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), 'yaml'
-        )
-    )
+    return Renoir(mode="plain", debug=True, path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "yaml"))
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def templater_indent():
     return Renoir(
-        mode='plain', adjust_indent=True, debug=True, path=os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), 'yaml'
-        )
+        mode="plain",
+        adjust_indent=True,
+        debug=True,
+        path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "yaml"),
     )
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def templater_html():
-    return Renoir(
-        debug=True, path=os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), 'html'
-        )
-    )
+    return Renoir(debug=True, path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "html"))
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def templater_html_indent():
     return Renoir(
-        escape='all', adjust_indent=True, debug=True,
-        path=os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), 'html'
-        )
+        escape="all",
+        adjust_indent=True,
+        debug=True,
+        path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "html"),
     )
 
 
@@ -79,11 +73,11 @@ obj:
 
 
 def test_plain(templater):
-    r = templater.render('basic.yaml', {})
+    r = templater.render("basic.yaml", {})
     assert r == yaml_rendered[1:]
     data = yaml.load(r, Loader=yaml.SafeLoader)
-    assert data['obj']['nested']['array'][1] == "bar"
-    assert data['obj']['array'][1]['array'][-1] == 1.2
+    assert data["obj"]["nested"]["array"][1] == "bar"
+    assert data["obj"]["array"][1]["array"][-1] == 1.2
 
 
 yaml_indent_rendered = """
@@ -139,26 +133,23 @@ added:
 
 
 def test_plain_indent(templater_indent):
-    r = templater_indent.render('nested.yaml', {
-        'indent': lambda v, i: (
-            "\n".join([
-                v.split("\n")[0],
-                "\n".join([
-                    f"{' '*i}{el}" for el in v.split("\n")[1:]
-                ])
-            ])
-        ),
-        'additional': "foo:\n  bar:\n    - baz"
-    })
-    assert "\n".join([l.rstrip() for l in r.splitlines()]) == \
-        yaml_indent_rendered[1:]
+    r = templater_indent.render(
+        "nested.yaml",
+        {
+            "indent": lambda v, i: (
+                "\n".join([v.split("\n")[0], "\n".join([f"{' '*i}{el}" for el in v.split("\n")[1:]])])
+            ),
+            "additional": "foo:\n  bar:\n    - baz",
+        },
+    )
+    assert "\n".join([l.rstrip() for l in r.splitlines()]) == yaml_indent_rendered[1:]
     data = yaml.load(r, Loader=yaml.SafeLoader)
-    assert data['obj']['nested']['array'][1] == "bar"
-    assert data['inclusion'][0]['main_key'] == 'main_val'
-    assert data['inclusion'][0]['inclusion_nest']['first'] == 'foo'
-    assert not data['obj']['array'][1]['array']
-    assert data['added']['indent']['foo']['bar'][0] == "baz"
-    assert data['added']['ints'][-1] == 8
+    assert data["obj"]["nested"]["array"][1] == "bar"
+    assert data["inclusion"][0]["main_key"] == "main_val"
+    assert data["inclusion"][0]["inclusion_nest"]["first"] == "foo"
+    assert not data["obj"]["array"][1]["array"]
+    assert data["added"]["indent"]["foo"]["bar"][0] == "baz"
+    assert data["added"]["ints"][-1] == 8
 
 
 html_rendered = """
@@ -196,13 +187,8 @@ html_rendered = """
 
 
 def test_html(templater_html):
-    r = templater_html.render(
-        'test.html', {
-            'posts': [{'title': 'foo'}, {'title': 'bar'}]
-        }
-    )
-    assert "\n".join([l.rstrip() for l in r.splitlines()]) == \
-        html_rendered[1:]
+    r = templater_html.render("test.html", {"posts": [{"title": "foo"}, {"title": "bar"}]})
+    assert "\n".join([l.rstrip() for l in r.splitlines()]) == html_rendered[1:]
 
 
 html_indent_rendered = """
@@ -240,13 +226,8 @@ html_indent_rendered = """
 
 
 def test_html_indent(templater_html_indent):
-    r = templater_html_indent.render(
-        'test.html', {
-            'posts': [{'title': 'foo'}, {'title': 'bar'}]
-        }
-    )
-    assert "\n".join([l.rstrip() for l in r.splitlines()]) == \
-        html_indent_rendered[1:]
+    r = templater_html_indent.render("test.html", {"posts": [{"title": "foo"}, {"title": "bar"}]})
+    assert "\n".join([l.rstrip() for l in r.splitlines()]) == html_indent_rendered[1:]
 
 
 html_indent_rendered2 = """
@@ -282,13 +263,8 @@ html_indent_rendered2 = """
 
 
 def test_html_indent2(templater_html_indent):
-    r = templater_html_indent.render(
-        'test2.html', {
-            'posts': [{'title': 'foo'}, {'title': 'bar'}]
-        }
-    )
-    assert "\n".join([l.rstrip() for l in r.splitlines()]) == \
-        html_indent_rendered2[1:]
+    r = templater_html_indent.render("test2.html", {"posts": [{"title": "foo"}, {"title": "bar"}]})
+    assert "\n".join([l.rstrip() for l in r.splitlines()]) == html_indent_rendered2[1:]
 
 
 html_pre_rendered = """
@@ -308,16 +284,15 @@ var list = [
 
 
 def test_html_indent_pre(templater_html_indent):
-    r = templater_html_indent.render('pre.html')
-    assert "\n".join([l.rstrip() for l in r.splitlines()]) == \
-        html_pre_rendered[1:]
+    r = templater_html_indent.render("pre.html")
+    assert "\n".join([l.rstrip() for l in r.splitlines()]) == html_pre_rendered[1:]
 
 
 def test_pyerror(templater_html):
     with pytest.raises(ZeroDivisionError) as exc:
-        templater_html.render('pyerror.html')
+        templater_html.render("pyerror.html")
 
-    tbs = ''.join(traceback.format_exception(exc.type, exc.value, exc.tb))
+    tbs = "".join(traceback.format_exception(exc.type, exc.value, exc.tb))
     frame = exc.traceback[-1]
 
     frames = []
@@ -327,22 +302,18 @@ def test_pyerror(templater_html):
         tb = tb.tb_next
     tb_frame = frames[-1]
 
-    tpath = os.sep.join(['html', 'pyerror.html'])
+    tpath = os.sep.join(["html", "pyerror.html"])
 
-    assert frame.name == 'template'
+    assert frame.name == "template"
     assert str(frame.path).endswith(tpath)
     assert tb_frame.tb_lineno == 2
 
     assert f'{tpath}", line 2, in template' in tbs
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def templater_blocks():
-    return Renoir(
-        mode='plain', debug=True, path=os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), 'blocks'
-        )
-    )
+    return Renoir(mode="plain", debug=True, path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "blocks"))
 
 
 _target_b1 = """
@@ -359,10 +330,8 @@ child l2"""
 
 
 def test_blocks_include(templater_blocks):
-    r = templater_blocks.render('child.txt', {'parent_name': './parent_incl.txt'})
-    assert "\n".join(
-        filter(None, [l.rstrip() for l in r.splitlines()])
-    ) == _target_b1[1:]
+    r = templater_blocks.render("child.txt", {"parent_name": "./parent_incl.txt"})
+    assert "\n".join(filter(None, [l.rstrip() for l in r.splitlines()])) == _target_b1[1:]
 
 
 _target_b2 = """
@@ -377,10 +346,8 @@ parent l4"""
 
 
 def test_blocks_noinclude(templater_blocks):
-    r = templater_blocks.render('child.txt', {'parent_name': './parent_noincl.txt'})
-    assert "\n".join(
-        filter(None, [l.rstrip() for l in r.splitlines()])
-    ) == _target_b2[1:]
+    r = templater_blocks.render("child.txt", {"parent_name": "./parent_noincl.txt"})
+    assert "\n".join(filter(None, [l.rstrip() for l in r.splitlines()])) == _target_b2[1:]
 
 
 _target_b3 = """
@@ -393,7 +360,5 @@ parent l2"""
 
 
 def test_blocks_include_multi(templater_blocks):
-    r = templater_blocks.render('child_multi_incl.txt', {'condition': True})
-    assert "\n".join(
-        filter(None, [l.rstrip() for l in r.splitlines()])
-    ) == _target_b3[1:]
+    r = templater_blocks.render("child_multi_incl.txt", {"condition": True})
+    assert "\n".join(filter(None, [l.rstrip() for l in r.splitlines()])) == _target_b3[1:]

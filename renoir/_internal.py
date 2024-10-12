@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-    renoir._internal
-    ----------------
+renoir._internal
+----------------
 
-    Provides internally used helpers and objects.
+Provides internally used helpers and objects.
 
-    :copyright: 2014 Giovanni Barillari
-    :license: BSD-3-Clause
+:copyright: 2014 Giovanni Barillari
+:license: BSD-3-Clause
 """
 
 

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-    renoir.extensions
-    -----------------
+renoir.extensions
+-----------------
 
-    Provides base classes to create extensions.
+Provides base classes to create extensions.
 
-    :copyright: 2014 Giovanni Barillari
-    :license: BSD-3-Clause
+:copyright: 2014 Giovanni Barillari
+:license: BSD-3-Clause
 """
 
 from typing import Any, Dict, Optional, Tuple, Type
@@ -15,7 +15,7 @@ from .parsing.lexers import Lexer
 
 
 class MetaExtension(type):
-    _ext_methods_ = {'load', 'render', 'context'}
+    _ext_methods_ = {"load", "render", "context"}
 
     def __new__(cls, name, bases, attrs):
         new_class = type.__new__(cls, name, bases, attrs)
@@ -25,12 +25,12 @@ class MetaExtension(type):
         new_class._ext_declared_methods_ = declared_methods
         all_methods = set()
         for base in reversed(new_class.__mro__[:-2]):
-            if hasattr(base, '_ext_declared_methods_'):
+            if hasattr(base, "_ext_declared_methods_"):
                 all_methods = all_methods | base._ext_declared_methods_
         all_methods = all_methods | declared_methods
         new_class._ext_all_methods_ = all_methods
-        new_class._ext_render_ = 'render' in all_methods
-        new_class._ext_context_ = 'context' in all_methods
+        new_class._ext_render_ = "render" in all_methods
+        new_class._ext_context_ = "context" in all_methods
         return new_class
 
 
@@ -45,11 +45,8 @@ class Extension(metaclass=MetaExtension):
         self.namespace = namespace
         self.env = env
         self.config = config or {}
-        if (
-            isinstance(self.file_extension, str) and
-            not self.file_extension.startswith('.')
-        ):
-            self.file_extension = '.' + self.file_extension
+        if isinstance(self.file_extension, str) and not self.file_extension.startswith("."):
+            self.file_extension = "." + self.file_extension
         self.__load_config()
 
     def __load_config(self):

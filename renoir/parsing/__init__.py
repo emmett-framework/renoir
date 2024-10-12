@@ -1,7 +1,2 @@
 from .lexers import Lexer
-from .parsers import (
-    TemplateParser,
-    IndentTemplateParser,
-    HTMLTemplateParser,
-    HTMLIndentTemplateParser
-)
+from .parsers import HTMLIndentTemplateParser, HTMLTemplateParser, IndentTemplateParser, TemplateParser
