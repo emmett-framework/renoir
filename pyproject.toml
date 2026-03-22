@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "renoir"
-version = "1.8.0"
+version = "1.9.0"
 description = "A templating engine designed with simplicity in mind"
 readme = "README.md"
 license = "BSD-3-Clause"
