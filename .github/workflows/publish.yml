@@ -14,13 +14,10 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v7
         with:
-          python-version: '3.12'
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
+          enable-cache: false
       - name: Build distributions
         run: |
           uv build

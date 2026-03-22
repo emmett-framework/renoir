@@ -136,8 +136,8 @@ def test_plain_indent(templater_indent):
     r = templater_indent.render(
         "nested.yaml",
         {
-            "indent": lambda v, i: (
-                "\n".join([v.split("\n")[0], "\n".join([f"{' '*i}{el}" for el in v.split("\n")[1:]])])
+            "indent": lambda v, i: "\n".join(
+                [v.split("\n")[0], "\n".join([f"{' ' * i}{el}" for el in v.split("\n")[1:]])]
             ),
             "additional": "foo:\n  bar:\n    - baz",
         },

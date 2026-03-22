@@ -14,18 +14,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+    - uses: actions/checkout@v6
+    - uses: astral-sh/setup-uv@v7
       with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install uv
-      uses: astral-sh/setup-uv@v3
-    - name: Install dependencies
+        enable-cache: false
+    - name: Install
       run: |
+        uv python install ${{ matrix.python-version }}
+        uv venv .venv
         uv sync --dev
     - name: Test
       run: |
@@ -35,18 +34,17 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+    - uses: actions/checkout@v6
+    - uses: astral-sh/setup-uv@v7
       with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install uv
-      uses: astral-sh/setup-uv@v3
-    - name: Install dependencies
+        enable-cache: false
+    - name: Install
       run: |
+        uv python install ${{ matrix.python-version }}
+        uv venv .venv
         uv sync --dev
     - name: Test
       run: |
@@ -56,19 +54,18 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+    - uses: actions/checkout@v6
+    - uses: astral-sh/setup-uv@v7
       with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install uv
-      uses: astral-sh/setup-uv@v3
-    - name: Install dependencies
+        enable-cache: false
+    - name: Install
       shell: bash
       run: |
+        uv python install ${{ matrix.python-version }}
+        uv venv .venv
         uv sync --dev
     - name: Test
       shell: bash

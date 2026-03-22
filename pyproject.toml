@@ -8,7 +8,7 @@ version = "1.9.0"
 description = "A templating engine designed with simplicity in mind"
 readme = "README.md"
 license = "BSD-3-Clause"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 
 authors = [
     { name = "Giovanni Barillari", email = "g@baro.dev" }
@@ -22,12 +22,11 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Text Processing :: Markup :: HTML"
 ]
@@ -109,5 +108,5 @@ known-first-party = ['renoir', 'tests']
 dev-dependencies = [
     "pytest>=7.4",
     "pyyaml>=6.0.1",
-    "ruff~=0.5.0",
+    "ruff~=0.11",
 ]

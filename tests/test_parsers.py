@@ -58,7 +58,7 @@ def test_raw(ptemplater_plain):
 
 
 def test_pycode_if(ptemplater_plain):
-    s = "{{if a == 1:}}\nfoo\n{{elif a == 2:}}\nbar" "\n{{else:}}\nfoobar\n{{pass}}"
+    s = "{{if a == 1:}}\nfoo\n{{elif a == 2:}}\nbar\n{{else:}}\nfoobar\n{{pass}}"
     r = ptemplater_plain._render(source=s, context={"a": 1})
     assert r == "foo\n"
     r = ptemplater_plain._render(source=s, context={"a": 2})
