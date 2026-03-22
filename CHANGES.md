@@ -1,6 +1,15 @@
 Renoir changelog
 ================
 
+Version 1.9
+-----------
+
+*Released on March 22nd 2026*
+
+- Removed Python 3.8 support
+- Removed Python 3.9 support
+- Added Python 3.14 support
+
 Version 1.8
 -----------
 
